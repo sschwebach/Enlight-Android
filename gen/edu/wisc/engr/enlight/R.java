@@ -8,6 +8,9 @@
 package edu.wisc.engr.enlight;
 
 public final class R {
+    public static final class array {
+        public static final int preset_array=0x7f060000;
+    }
     public static final class attr {
     }
     public static final class dimen {
@@ -21,21 +24,42 @@ public final class R {
         public static final int activity_vertical_margin=0x7f040001;
     }
     public static final class drawable {
-        public static final int ic_launcher=0x7f020000;
+        public static final int enlight_icon=0x7f020000;
+        public static final int ic_launcher=0x7f020001;
+        public static final int toggle_colors=0x7f020002;
     }
     public static final class id {
-        public static final int action_settings=0x7f080000;
+        public static final int action_settings=0x7f090011;
+        public static final int buttonLayout=0x7f090002;
+        public static final int buttonList=0x7f090000;
+        public static final int button_layout=0x7f09000a;
+        public static final int button_scroll=0x7f090009;
+        public static final int change_key=0x7f09000e;
+        public static final int current_text=0x7f090008;
+        public static final int fountain_onoff=0x7f090005;
+        public static final int fountain_running=0x7f090004;
+        public static final int fountain_switch=0x7f090003;
+        public static final int fountaincam_text=0x7f09000d;
+        public static final int lights_status=0x7f09000b;
+        public static final int overview_text=0x7f090007;
+        public static final int overview_view=0x7f090006;
+        public static final int refresh_button=0x7f09000f;
+        public static final int refresh_last=0x7f090010;
+        public static final int refresh_view=0x7f090001;
+        public static final int speaker_status=0x7f09000c;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
     }
     public static final class menu {
-        public static final int main=0x7f070000;
+        public static final int main=0x7f080000;
     }
     public static final class string {
-        public static final int action_settings=0x7f050001;
+        public static final int action_settings=0x7f050002;
         public static final int app_name=0x7f050000;
-        public static final int hello_world=0x7f050002;
+        public static final int enlight_welcome=0x7f050004;
+        public static final int hello_world=0x7f050003;
+        public static final int home_page=0x7f050001;
     }
     public static final class style {
         /** 
@@ -59,10 +83,10 @@ public final class R {
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f060000;
+        public static final int AppBaseTheme=0x7f070000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f060001;
+        public static final int AppTheme=0x7f070001;
     }
 }
