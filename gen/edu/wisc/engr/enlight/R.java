@@ -40,13 +40,13 @@ public final class R {
         public static final int fountain_running=0x7f090004;
         public static final int fountain_switch=0x7f090003;
         public static final int fountaincam_text=0x7f09000d;
-        public static final int lights_status=0x7f09000b;
         public static final int overview_text=0x7f090007;
         public static final int overview_view=0x7f090006;
         public static final int refresh_button=0x7f09000f;
         public static final int refresh_last=0x7f090010;
         public static final int refresh_view=0x7f090001;
-        public static final int speaker_status=0x7f09000c;
+        public static final int reqControlButton=0x7f09000b;
+        public static final int sendButton=0x7f09000c;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;

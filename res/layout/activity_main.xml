@@ -28,19 +28,19 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
                     android:layout_marginTop="12dp"
-                    android:text="Fountain Running"
+                    android:text="Fountain Status:"
                     android:textColor="#FFFFFF"
                     android:textSize="20sp" />
 
-                <Switch
+                <TextView
                     android:id="@+id/fountain_onoff"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_marginTop="12dp"
                     android:animateLayoutChanges="true"
-                    android:textOff="Off"
-                    android:textOn="On" />
+                    android:text="On"
+                    android:textColor="#FFFFFF" />
             </RelativeLayout>
 
             <View
@@ -80,39 +80,34 @@
                     android:id="@+id/button_scroll"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:layout_below="@id/current_text"
                     android:layout_alignParentLeft="true"
+                    android:layout_below="@id/current_text"
                     android:layout_marginTop="10dp" >
 
                     <LinearLayout
-                        android:orientation="horizontal"
                         android:id="@+id/button_layout"
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent" >
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal" >
                     </LinearLayout>
                 </HorizontalScrollView>
 
-                <TextView
-                    android:id="@+id/lights_status"
-                    android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/reqControlButton"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_below="@id/button_scroll"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginTop="10dp"
-                    android:text="Lights:       Active"
+                    android:layout_below="@+id/button_scroll"
+                    android:text="Request Control"
                     android:textColor="#FFFFFF" />
-
-                <TextView
-                    android:id="@+id/speaker_status"
-                    android:layout_width="wrap_content"
+                
+                <Button
+                    android:id="@+id/sendButton"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_below="@id/lights_status"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginTop="10dp"
-                    android:text="Speakers:       Inactive"
-                    android:textColor="#FFFFFF" />
+                    android:layout_below="@+id/reqControlButton"
+                    android:text="Send!"
+                    android:textColor="#FFFFFF"
+                    android:visibility="gone" />
             </RelativeLayout>
 
             <View
@@ -128,7 +123,7 @@
                 android:layout_marginTop="12dp"
                 android:text="Still from FountainCam..."
                 android:textColor="#FFFFFF"
-                android:textSize="20dp" />
+                android:textSize="20sp" />
 
             <View
                 android:layout_width="wrap_content"
@@ -143,7 +138,7 @@
                 android:layout_marginTop="12dp"
                 android:text="Change API Key..."
                 android:textColor="#FFFFFF"
-                android:textSize="20dp" />
+                android:textSize="20sp" />
         </LinearLayout>
     </ScrollView>
 
@@ -156,10 +151,10 @@
         <Button
             android:id="@+id/refresh_button"
             android:layout_width="wrap_content"
-            android:layout_height="25dp"
+            android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:background="#22CC22"
-            android:text=" Send! " />
+            android:text=" Refresh "
+            android:textColor="#FFFFFF" />
 
         <TextView
             android:id="@+id/refresh_last"
@@ -167,7 +162,6 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/refresh_button"
             android:layout_centerHorizontal="true"
-            android:text="Last full refresh on July 16, 2035"
             android:textColor="#BBBBBB" />
     </RelativeLayout>
 

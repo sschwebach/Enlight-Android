@@ -2,6 +2,7 @@
 ## Eclipse
 #################
 
+Utilities.java
 *.pydevproject
 .project
 .metadata
