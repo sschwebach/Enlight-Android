@@ -30,11 +30,13 @@ import android.util.Log;
  */
 public class FountainControlHandler {
 	private Context mContext;
+	private ProgressDialog mDialog;
 	private MainActivity mActivity;
 	private String apiKey = "00000";
-	public ProgressDialog progress;
 	public boolean hasControl = false;
 	public int userId = -1;
+	public int userPosition = -1;
+	public int userPrio = -1;
 	public boolean isLast = true;
 	public static final int REQUESTCONTROL = 0;
 	public static final int QUERYCONTROL = 1;
@@ -43,11 +45,13 @@ public class FountainControlHandler {
 	public static final int SETALLVALVES = 4;
 	public static final int	QUERYSINGLEVALVE = 5;
 	public static final int SETSINGLEVALVE = 6;
+	public static final int GETPATTERN = 7;
+	public static final int SETPATTERN = 8;
 
 	public FountainControlHandler(Context c){
 		this.mContext = c;
 		this.mActivity = (MainActivity) c;
-		progress = new ProgressDialog(this.mContext);
+		mDialog = mActivity.pDialog;
 	}
 
 	//TODO
@@ -74,9 +78,6 @@ public class FountainControlHandler {
 		requestControlTask.addNVP(new BasicNameValuePair("requestedLength", "15"));
 		requestControlTask.requestControl = REQUESTCONTROL;
 		requestControlTask.isPost = true;
-		progress.setTitle("Please Wait");
-		progress.setMessage("Requesting Control...");
-		progress.show();
 		requestControlTask.execute(Utilities.requestControlURL);
 	}
 
@@ -88,9 +89,6 @@ public class FountainControlHandler {
 		FountainControlTask requestQueryTask = new FountainControlTask();
 		requestQueryTask.requestControl = QUERYCONTROL;
 		requestQueryTask.isPost = false;
-		progress.setTitle("Please Wait");
-		progress.setMessage("Checking Status...");
-		progress.show();
 		requestQueryTask.execute(Utilities.queryURL);
 	}
 
@@ -102,58 +100,80 @@ public class FountainControlHandler {
 		releaseControlTask.requestControl = RELEASECONTROL;
 		releaseControlTask.isPost = true;
 		releaseControlTask.addNVP(new BasicNameValuePair("apikey", "" + apiKey));
-		progress.setTitle("Please Wait");
-		progress.setMessage("Releasing Control...");
-		progress.show();
 		releaseControlTask.execute(Utilities.releaseControlURL);
 	}
 
+	/**
+	 * This method is called to get the state of all the valves
+	 */
 	public void queryAllValves(){
 		FountainControlTask valveTask = new FountainControlTask();
 		valveTask.requestControl = QUERYALLVALVES;
 		valveTask.isPost = false;
-		progress.setTitle("Please Wait");
-		progress.setMessage("Getting valve states...");
-		progress.show();
 		valveTask.execute(Utilities.valvesURL);
 	}
 
+	/**
+	 * This method is used to set all the valves at once.
+	 * @param bitmask The bitmask of which valves should be on (1 = on)
+	 */
 	public void setAllValves(int bitmask){
 		FountainControlTask valveTask = new FountainControlTask();
 		valveTask.requestControl = SETALLVALVES;
 		valveTask.isPost = true;
 		valveTask.addNVP(new BasicNameValuePair("apikey", "" + apiKey));
 		valveTask.addNVP(new BasicNameValuePair("bitmask", "" + bitmask));
-		progress.setTitle("Please Wait");
-		progress.setMessage("Setting Valve States...");
-		progress.show();
 		valveTask.execute(Utilities.valvesURL);
 	}
 
+	/**
+	 * This method is called to get the status of a single valve
+	 * @param valveID The id of the valve
+	 */
 	public void querySingleValve(int valveID){
 		FountainControlTask valveTask = new FountainControlTask();
 		valveTask.requestControl = QUERYSINGLEVALVE;
 		valveTask.isPost = false;
-		progress.setTitle("Please Wait");
-		progress.setMessage("Getting State of Valve " + valveID + "...");
-		progress.show();
 		valveTask.execute(Utilities.valvesURL + "/" + valveID);
 	}
 
+	/**
+	 * This method is called to set the status of a single valve
+	 * @param valveID The id of the valve
+	 * @param on true = on, false = off
+	 */
 	public void setSingleValve(int valveID, boolean on){
 		FountainControlTask valveTask = new FountainControlTask();
 		valveTask.requestControl = SETSINGLEVALVE;
 		valveTask.isPost = true;
 		valveTask.addNVP(new BasicNameValuePair("apikey", "" + apiKey));
 		valveTask.addNVP(new BasicNameValuePair("spraying", "" + on));
-		progress.setTitle("Please Wait");
-		if (on){
-			progress.setMessage("Getting State of Valve " + valveID + "to on...");
-		}else{
-			progress.setMessage("Getting State of Valve " + valveID + "to off...");
-		}
-		progress.show();
 		valveTask.execute(Utilities.valvesURL + "/" + valveID);
+	}
+	
+	/**
+	 * This method is used to get all the available patterns, as well as 
+	 * the currently active pattern (if there is any)
+	 */
+	public void getPattern(){
+		FountainControlTask patternTask = new FountainControlTask();
+		patternTask.requestControl = GETPATTERN;
+		patternTask.isPost = false;
+		patternTask.execute(Utilities.allPatternsURL);
+	}
+	
+	/**
+	 * This method is used to set a certain pattern.
+	 * @param id The id of the pattern.
+	 */
+	public void setPattern(int id){
+		//TODO ask Alex how to send "turn patterns off"
+		FountainControlTask patternTask = new FountainControlTask();
+		patternTask.requestControl = SETPATTERN;
+		patternTask.isPost = true;
+		patternTask.addNVP(new BasicNameValuePair("apikey", "" + apiKey));
+		patternTask.addNVP(new BasicNameValuePair("setCurrent", "true"));
+		patternTask.execute(Utilities.singlePatternsURL + "/" + id);
 	}
 	/**
 	 * A setter method for APIKey. In android it's probably better to just 
@@ -174,7 +194,11 @@ public class FountainControlHandler {
 		public void addNVP(NameValuePair toAdd){
 			pairs.add(toAdd);
 		}
-
+		@Override
+		protected void onPreExecute(){
+			mActivity.pDialog.show();
+		}
+		
 		@Override
 		protected HttpResponse doInBackground(String... arg0) {
 			if (isPost){
@@ -210,6 +234,7 @@ public class FountainControlHandler {
 
 			if (response == null){
 				//bad request, check internet connection
+				mActivity.pDialog.hide();
 				return;
 			}
 			try{
@@ -224,9 +249,21 @@ public class FountainControlHandler {
 				case REQUESTCONTROL:	
 					break;
 				case QUERYCONTROL:
+					UserQueue queue = new UserQueue();
+					queue.deviceID = userId;
+					queue.devicePos = userPosition;
+					queue.devicePrio = userPrio;
 					for (int i = 0; i < finalResult.length(); i++){
-						//TODO build a queue
+						currJSON = finalResult.getJSONObject(i);
+						int id = currJSON.getInt("controllerID");
+						int acquired = currJSON.getInt("acquired");
+						int expires = currJSON.getInt("expires");
+						int priority = currJSON.getInt("priority");
+						int position = currJSON.getInt("queuePosition");
+						queue.addUser(new UserEntry(id, acquired, expires, priority, position));
+						//TODO build a queue AND SET THE ACTIVITY'S QUEUE TO THIS
 					}
+					mActivity.userQueue = queue;
 					break;
 				case RELEASECONTROL:
 					currJSON = finalResult.getJSONObject(0);
@@ -263,6 +300,28 @@ public class FountainControlHandler {
 						//TODO some error message
 					}
 					break;
+				case GETPATTERN:
+					ArrayList<Pattern> patterns = new ArrayList<Pattern>();
+					for (int i = 0; i < finalResult.length(); i++){
+						currJSON = finalResult.getJSONObject(i);
+						int patternID = currJSON.getInt("id");
+						String patternName = currJSON.getString("name");
+						boolean isActive = currJSON.getBoolean("active");
+						//TODO define a pattern object and make one here
+						patterns.add(new Pattern(patternID, patternName, isActive));
+					}
+					mActivity.patterns = patterns;
+					//TODO now that we have all these patterns do something
+					//with it (most likely in the activity)
+					break;
+				case SETPATTERN:
+					//TODO
+					currJSON = finalResult.getJSONObject(0);
+					success = currJSON.getBoolean("success");
+					if (!success){
+						//TODO some error message
+					}
+					break;
 				default:
 					break;
 				}
@@ -272,8 +331,9 @@ public class FountainControlHandler {
 			}finally{
 				if (isLast){
 					mActivity.refresh();
+					mActivity.pDialog.hide();
+					Log.e("Pdialog", "HIDE");
 				}
-				progress.hide();
 			}
 		}
 	}

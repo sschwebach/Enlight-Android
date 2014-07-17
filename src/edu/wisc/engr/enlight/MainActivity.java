@@ -1,12 +1,22 @@
 package edu.wisc.engr.enlight;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.text.format.Time;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -20,17 +30,27 @@ public class MainActivity extends Activity {
 	boolean inQueue = false;
 	boolean controlChanged = false;
 	boolean[] valveStates = new boolean[24];
+	ProgressDialog pDialog;
 	Time lastRefresh;
 	int bitmask;
 	int userID;
+	public UserQueue userQueue;
+	public ArrayList<Pattern> patterns;
 	Button sendButton;
 	Button requestButton;
 	TextView refreshTime;
+	FountainViewCanvas leftFountain;
+	FountainViewCanvas rightFountain;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		//TODO Load the last refresh from storage
+		lastRefresh = new Time();
+		patterns = new ArrayList<Pattern>();
+		leftFountain = new FountainViewCanvas(this, true);
+		rightFountain = new FountainViewCanvas(this, false);
 		doSetup();
 	}
 
@@ -50,13 +70,13 @@ public class MainActivity extends Activity {
 	 */
 	public void refresh(){
 		//TODO
-		Toast toast = Toast.makeText(this, "Hello", Toast.LENGTH_LONG);
+		Toast toast = Toast.makeText(this, "Refresh", Toast.LENGTH_LONG);
 		toast.show();
 		LinearLayout buttonArea = (LinearLayout) findViewById(R.id.button_layout);
 		//Refresh the button checks
-		for (int i = 1; i <= 24; i++){
-			((Button) buttonArea.getChildAt(i)).setPressed(valveStates[i]);
-		}
+//		for (int i = 0; i < 22; i++){
+//			((Button) buttonArea.getChildAt(i)).setPressed(valveStates[i]);
+//		}
 		//Let the user know if they have control or not
 		if (controlChanged && !hasControl){ //if they lost control since last refresh
 			controlChanged = false;
@@ -76,19 +96,27 @@ public class MainActivity extends Activity {
 	}
 
 	private void doSetup(){
+		pDialog = new ProgressDialog(this);
 		controller = new FountainControlHandler(this);
 		final LinearLayout buttonArea = (LinearLayout) findViewById(R.id.button_layout);
 		refreshTime = (TextView)findViewById(R.id.refresh_last);
 		sendButton = (Button) findViewById(R.id.sendButton);
+		//Draw the fountain images
+		LinearLayout fountainCanvasLeft = (LinearLayout) findViewById(R.id.canvas_left);
+		LinearLayout fountainCanvasRight = (LinearLayout) findViewById(R.id.canvas_right);
+		fountainCanvasLeft.addView(leftFountain);
+		fountainCanvasRight.addView(rightFountain);
 		//Add the valve control buttons
 		for (int i = 1; i <= 24; i++){
 			ToggleButton newButton = new ToggleButton(this);
 			newButton.setText("" + i);
 			newButton.setTextOn("" + i);
 			newButton.setTextOff("" + i);
+			newButton.setTextSize(10);
 			newButton.setPadding(0,  0, 10, 0);
 			newButton.setTextColor(0xFFFFFFFF);
 			buttonArea.addView(newButton);
+
 		}
 		//Add the submit button
 		Button resetButton = (Button) findViewById(R.id.refresh_button);
@@ -124,7 +152,15 @@ public class MainActivity extends Activity {
 			}
 
 		});
-
+		//TODO once everything is set up, refresh the layout
+		refresh();
 	}
-
+	
+	public static float convertDpToPixel(float dp, Context context){
+	    Resources resources = context.getResources();
+	    DisplayMetrics metrics = resources.getDisplayMetrics();
+	    float px = dp * (metrics.densityDpi / 160f);
+	    return px;
+	}
+	
 }
