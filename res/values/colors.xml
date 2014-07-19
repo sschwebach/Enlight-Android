@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="titlebackgroundcolor">#b70101</color>
+    <color name="titletextcolor">#FFFFFF</color>
+    <color name="actionbartext">#FFFFFF</color>
+    <color name="badgerred">#b70101</color>
+    <color name="badgergold">#e7d9c1</color>
+    <color name="textcolor">#000000</color>
+    <color name="textcolorgold">#b70101</color>
+    <color name="cream">#6E6A5B</color>
+
+</resources>

@@ -3,17 +3,23 @@ package edu.wisc.engr.enlight;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.Shader;
+import android.graphics.SweepGradient;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 public class FountainViewCanvas extends View{
 	Paint paint = new Paint();
 	Paint paintCyan = new Paint();
 	Paint paintBlack = new Paint();
+	int badgerGold = 0xffe7d9c1;
+	int badgerRed = 0xffb70101;
+	int cream = 0xFF6E6A5B;
+	int darkGrey = 0xFFC8C5BB;
 	Canvas mCanvas;
 	int height;
 	int width;
@@ -26,21 +32,22 @@ public class FountainViewCanvas extends View{
 	boolean left;
 	RectF rectOuter;
 	RectF rectInner;
-	boolean[] buttonPressed;
+	public boolean[] buttonPressed;
 
 	public FountainViewCanvas(Context context, boolean left){
 		super(context);
 		this.left = left;
 		paint.setAntiAlias(true);
-		paint.setColor(Color.WHITE);
+		paint.setColor(Color.BLACK);
 		paint.setStyle(Paint.Style.STROKE);
 		paint.setStrokeWidth(4.5f);
 		paintCyan.setAntiAlias(true);
-		paintCyan.setColor(Color.CYAN);
+		paintCyan.setColor(badgerRed);
+
 		paintCyan.setStyle(Paint.Style.FILL);
 		//TODO set the color to the same one as the xml layout
 		paintBlack.setAntiAlias(true);
-		paintBlack.setColor(Color.BLACK);
+		paintBlack.setColor(Color.WHITE);
 		paintBlack.setStyle(Paint.Style.FILL);
 		buttonPressed = new boolean[12];
 
@@ -89,31 +96,39 @@ public class FountainViewCanvas extends View{
 			canvas.drawArc(rectInner, -90, 180, false, paint);
 
 		}
-		
+
 		//draw any views that are filled in
 		for (int i = 1; i <= 12; i++){
 			if (left){
 				//compute the starting and ending angles for the segment we're checking
-				if (buttonPressed[i - 1]){
-					float angleStart = (float) (Math.PI/2 + (Math.PI/12) * (i-1));
-					float angleEnd = (float) (Math.PI/2 + (Math.PI/12) * (i));
-					RectF fill = new RectF();
-					fill.set(centerX - radiusOuter, centerY - radiusOuter, centerX + radiusOuter, centerY + radiusOuter);
-					canvas.drawArc(fill, (float) (angleStart*180/Math.PI), (float) ((angleEnd - angleStart)*180/Math.PI), true, paintCyan);
+				float angleStart = (float) (Math.PI/2 + (Math.PI/12) * (i-1));
+				float angleEnd = (float) (Math.PI/2 + (Math.PI/12) * (i));
+				RectF fill = new RectF();
+				fill.set(centerX - radiusOuter, centerY - radiusOuter, centerX + radiusOuter, centerY + radiusOuter);
+				if (buttonPressed[i-1]){
+					paintCyan.setColor(badgerRed);
+				}else{
+					paintCyan.setColor(darkGrey);
 				}
+				canvas.drawArc(fill, (float) (angleStart*180/Math.PI), (float) ((angleEnd - angleStart)*180/Math.PI), true, paintCyan);
+
 
 			}else{
 				//compute the starting and ending angles for the segment we're checking
-				if (buttonPressed[i - 1]){
-					float angleStart = (float) (Math.PI/2 - (Math.PI/12) * (i-1));
-					float angleEnd = (float) (Math.PI/2 - (Math.PI/12) * (i));
-					RectF fill = new RectF();
-					fill.set(centerX - radiusOuter, centerY - radiusOuter, centerX + radiusOuter, centerY + radiusOuter);
-					canvas.drawArc(fill, (float) (angleStart*180/Math.PI), (float) ((angleEnd - angleStart)*180/Math.PI), true, paintCyan);
+				float angleStart = (float) (Math.PI/2 - (Math.PI/12) * (i-1));
+				float angleEnd = (float) (Math.PI/2 - (Math.PI/12) * (i));
+				RectF fill = new RectF();
+				fill.set(centerX - radiusOuter, centerY - radiusOuter, centerX + radiusOuter, centerY + radiusOuter);
+				if (buttonPressed[i-1]){
+					paintCyan.setColor(badgerRed);
+				}else{
+					paintCyan.setColor(darkGrey);
 				}
+				canvas.drawArc(fill, (float) (angleStart*180/Math.PI), (float) ((angleEnd - angleStart)*180/Math.PI), true, paintCyan);
+
 			}
 		}
-		
+
 		//draw the rest of the outline
 		canvas.drawLine(centerX, centerY - radiusOuter, centerX, centerY - radiusInner, paint);
 		canvas.drawLine(centerX, centerY + radiusInner, centerX, centerY + radiusOuter, paint);
@@ -144,13 +159,13 @@ public class FountainViewCanvas extends View{
 		}
 		//Lastly, draw an arc in the center to get rid of a few things...
 		if (left){
-			canvas.drawArc(rectInner, 90, 180, true, paintBlack);
+			canvas.drawArc(rectInner, 89, 182, true, paintBlack);
 
 		}else{
-			canvas.drawArc(rectInner, -90, 180, true, paintBlack);
+			canvas.drawArc(rectInner, -91, 182, true, paintBlack);
 		}
 
-		
+
 
 	}
 
@@ -162,8 +177,15 @@ public class FountainViewCanvas extends View{
 		if (left){
 			angle += Math.PI;
 		}
+		if (left && x > centerX){
+			return 0;
+		}
+		if (!left && x < centerX){
+			return 0;
+		}
 		Log.e("ANGLE", "" + angle);
 		for (int i = 1; i <= 12; i++){
+			//TODO make sure we're not getting the angle 180 degrees from what we think we're getting
 			if (left){
 				//compute the starting and ending angles for the segment we're checking
 				float angleStart = (float) (Math.PI/2 + (Math.PI/12) * (i-1));
@@ -173,7 +195,7 @@ public class FountainViewCanvas extends View{
 				if (angle > angleStart && angle < angleEnd){
 					if (rad > radiusInner && rad < radiusOuter){
 						buttonPressed[i-1] = !buttonPressed[i-1];
-						return i;
+						return i; //this makes it easier to line up the number with the actual valve number
 					}
 				}
 			}else{
@@ -202,6 +224,7 @@ public class FountainViewCanvas extends View{
 			float yLoc = e.getY();
 			int buttonNum = detectButton(xLoc, yLoc);
 			if (buttonNum > 0){
+				Log.e("BUTTON", "" + buttonNum);
 				this.invalidate();
 			}
 		}

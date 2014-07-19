@@ -14,10 +14,12 @@
         android:allowBackup="true"
         android:icon="@drawable/enlight_icon"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/CustomActionBarTheme" >
         <activity
             android:name="edu.wisc.engr.enlight.MainActivity"
-            android:label="@string/home_page" >
+            android:configChanges="orientation|keyboardHidden"
+            android:label="@string/home_page"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

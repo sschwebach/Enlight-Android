@@ -6,9 +6,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
@@ -16,12 +14,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
+import android.view.ViewParent;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 public class MainActivity extends Activity {
 	FountainControlHandler controller;
@@ -36,8 +34,9 @@ public class MainActivity extends Activity {
 	int userID;
 	public UserQueue userQueue;
 	public ArrayList<Pattern> patterns;
+	ImageButton refreshButton;
 	Button sendButton;
-	Button requestButton;
+	ImageButton abdicateButton;
 	TextView refreshTime;
 	FountainViewCanvas leftFountain;
 	FountainViewCanvas rightFountain;
@@ -45,7 +44,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.activity_main_new);
 		//TODO Load the last refresh from storage
 		lastRefresh = new Time();
 		patterns = new ArrayList<Pattern>();
@@ -72,23 +71,19 @@ public class MainActivity extends Activity {
 		//TODO
 		Toast toast = Toast.makeText(this, "Refresh", Toast.LENGTH_LONG);
 		toast.show();
-		LinearLayout buttonArea = (LinearLayout) findViewById(R.id.button_layout);
 		//Refresh the button checks
-//		for (int i = 0; i < 22; i++){
-//			((Button) buttonArea.getChildAt(i)).setPressed(valveStates[i]);
-//		}
 		//Let the user know if they have control or not
 		if (controlChanged && !hasControl){ //if they lost control since last refresh
 			controlChanged = false;
 			Toast controlToast = Toast.makeText(this, "You no longer have control", Toast.LENGTH_SHORT);
 			controlToast.show();
 			sendButton.setVisibility(View.GONE);
-			requestButton.setText("Request Control");
+			sendButton.setText("Request Control");
 		}
 		if (hasControl){
 			//Show the send button if it isn't already shown
 			sendButton.setVisibility(View.VISIBLE);
-			requestButton.setText("Release Control");
+			sendButton.setText("Release Control");
 		}
 		lastRefresh.setToNow();
 		String currTime = lastRefresh.format("Last full refresh on %B %d, %Y at %I:%M %p");
@@ -96,51 +91,52 @@ public class MainActivity extends Activity {
 	}
 
 	private void doSetup(){
+
 		pDialog = new ProgressDialog(this);
 		controller = new FountainControlHandler(this);
-		final LinearLayout buttonArea = (LinearLayout) findViewById(R.id.button_layout);
-		refreshTime = (TextView)findViewById(R.id.refresh_last);
-		sendButton = (Button) findViewById(R.id.sendButton);
+		refreshTime = (TextView)findViewById(R.id.text_refresh);
+		sendButton = (Button) findViewById(R.id.button_send);
 		//Draw the fountain images
-		LinearLayout fountainCanvasLeft = (LinearLayout) findViewById(R.id.canvas_left);
-		LinearLayout fountainCanvasRight = (LinearLayout) findViewById(R.id.canvas_right);
+		LinearLayout fountainCanvasLeft = (LinearLayout) findViewById(R.id.layout_canvas_left);
+		LinearLayout fountainCanvasRight = (LinearLayout) findViewById(R.id.layout_canvas_right);
 		fountainCanvasLeft.addView(leftFountain);
 		fountainCanvasRight.addView(rightFountain);
-		//Add the valve control buttons
-		for (int i = 1; i <= 24; i++){
-			ToggleButton newButton = new ToggleButton(this);
-			newButton.setText("" + i);
-			newButton.setTextOn("" + i);
-			newButton.setTextOff("" + i);
-			newButton.setTextSize(10);
-			newButton.setPadding(0,  0, 10, 0);
-			newButton.setTextColor(0xFFFFFFFF);
-			buttonArea.addView(newButton);
 
-		}
 		//Add the submit button
 		Button resetButton = (Button) findViewById(R.id.refresh_button);
-		resetButton.setOnClickListener(new OnClickListener(){
+		sendButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v){
-				ContactFountainTask task = new ContactFountainTask();
-				int sum = 0;
-				for (int i = 0; i < 22; i++){
-					if (((ToggleButton) buttonArea.getChildAt(i)).isChecked() && i != 10 && i != 11){ //don't want the big valves
-						sum = sum + (int) Math.pow(2, i);
-					}
-				}
 				if (hasControl){
+					ContactFountainTask task = new ContactFountainTask();
+					int sum = 0;
+					for (int i = 0; i < 12; i++){
+						//start with the left valve
+						//both valves are back asswards right now
+						if (leftFountain.buttonPressed[i]){
+							int valveNum = 11 - i;
+							Log.e("Valvenum", "" + valveNum);
+							sum = sum + (int) Math.pow(2, valveNum);
+						}if (rightFountain.buttonPressed[i]){
+							int valveNum = 23 - i;
+							Log.e("Valvenum", "" + valveNum);
+							sum = sum + (int) Math.pow(2, valveNum);
+						}
+					}
 					controller.setAllValves(sum);
+					Log.e("Valve", "" + sum);
+					task.setValveRequest(sum);
+					task.execute("Hello");
+				}else{
+					controller.requestControl();
 				}
-				task.setValveRequest(sum);
-				task.execute("Hello");
+
 				Log.e("Button", "Button pressed!");
 			}
+
 		});
 
-		requestButton = (Button) findViewById(R.id.reqControlButton);
-		requestButton.setOnClickListener(new OnClickListener(){
+		sendButton.setOnClickListener(new OnClickListener(){
 
 			@Override
 			public void onClick(View arg0) {
@@ -155,12 +151,12 @@ public class MainActivity extends Activity {
 		//TODO once everything is set up, refresh the layout
 		refresh();
 	}
-	
+
 	public static float convertDpToPixel(float dp, Context context){
-	    Resources resources = context.getResources();
-	    DisplayMetrics metrics = resources.getDisplayMetrics();
-	    float px = dp * (metrics.densityDpi / 160f);
-	    return px;
+		Resources resources = context.getResources();
+		DisplayMetrics metrics = resources.getDisplayMetrics();
+		float px = dp * (metrics.densityDpi / 160f);
+		return px;
 	}
-	
+
 }
