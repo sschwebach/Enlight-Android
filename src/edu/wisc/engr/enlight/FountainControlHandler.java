@@ -68,6 +68,7 @@ public class FountainControlHandler {
 		isLast = true;
 		queryAllValves();
 	}
+	
 
 	/**
 	 * This method is called to request control from the fountain.

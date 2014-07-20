@@ -15,4 +15,9 @@ public class Pattern {
 		this.name = name;
 		this.active = active;
 	}
+	
+	@Override
+	public String toString(){
+		return this.name;
+	}
 }

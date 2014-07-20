@@ -52,6 +52,9 @@ public class FountainViewCanvas extends View{
 		buttonPressed = new boolean[12];
 
 
+
+
+
 	}
 
 	@Override
@@ -183,14 +186,12 @@ public class FountainViewCanvas extends View{
 		if (!left && x < centerX){
 			return 0;
 		}
-		Log.e("ANGLE", "" + angle);
 		for (int i = 1; i <= 12; i++){
 			//TODO make sure we're not getting the angle 180 degrees from what we think we're getting
 			if (left){
 				//compute the starting and ending angles for the segment we're checking
 				float angleStart = (float) (Math.PI/2 + (Math.PI/12) * (i-1));
 				float angleEnd = (float) (Math.PI/2 + (Math.PI/12) * (i));
-				Log.e("ANGLE RANGE", "From " + angleStart + " to " +angleEnd);
 
 				if (angle > angleStart && angle < angleEnd){
 					if (rad > radiusInner && rad < radiusOuter){
@@ -202,7 +203,6 @@ public class FountainViewCanvas extends View{
 				//compute the starting and ending angles for the segment we're checking
 				float angleStart = (float) (Math.PI/2 - (Math.PI/12) * (i-1));
 				float angleEnd = (float) (Math.PI/2 - (Math.PI/12) * (i));
-				Log.e("ANGLE RANGE", "From " + angleStart + " to " +angleEnd);
 
 				if (angle < angleStart && angle > angleEnd){
 					if (rad > radiusInner && rad < radiusOuter){

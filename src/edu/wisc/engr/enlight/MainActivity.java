@@ -1,12 +1,13 @@
 package edu.wisc.engr.enlight;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
@@ -14,10 +15,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewParent;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +39,8 @@ public class MainActivity extends Activity {
 	Button sendButton;
 	ImageButton abdicateButton;
 	TextView refreshTime;
+	Spinner patternSpinner;
+	Timer refreshTimer;
 	FountainViewCanvas leftFountain;
 	FountainViewCanvas rightFountain;
 
@@ -50,9 +53,25 @@ public class MainActivity extends Activity {
 		patterns = new ArrayList<Pattern>();
 		leftFountain = new FountainViewCanvas(this, true);
 		rightFountain = new FountainViewCanvas(this, false);
+		refreshTimer = new Timer();
+		refreshTimer.schedule(new TimerTask() {
+			@Override
+			public void run(){
+				TimerMethod();
+			}
+		}, 0, 5000);
 		doSetup();
 	}
 
+	private void TimerMethod(){
+		this.runOnUiThread(new Runnable(){
+			@Override
+			public void run(){
+				//add a controller. method to refresh shit
+				controller.queryControl();
+			}
+		});
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -69,10 +88,9 @@ public class MainActivity extends Activity {
 	 */
 	public void refresh(){
 		//TODO
-		Toast toast = Toast.makeText(this, "Refresh", Toast.LENGTH_LONG);
-		toast.show();
 		//Refresh the button checks
 		//Let the user know if they have control or not
+		Log.e("REFRESH", "REFRESH");
 		if (controlChanged && !hasControl){ //if they lost control since last refresh
 			controlChanged = false;
 			Toast controlToast = Toast.makeText(this, "You no longer have control", Toast.LENGTH_SHORT);
@@ -85,6 +103,13 @@ public class MainActivity extends Activity {
 			sendButton.setVisibility(View.VISIBLE);
 			sendButton.setText("Release Control");
 		}
+		//get and set the patterns
+		if (patterns.size() == 0){
+			patterns.add(new Pattern(0, "Manual", true));
+		}
+		PatternSpinnerAdapter<Pattern> adapter = new PatternSpinnerAdapter<Pattern>(this, android.R.layout.simple_spinner_item, patterns);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		patternSpinner.setAdapter(adapter);
 		lastRefresh.setToNow();
 		String currTime = lastRefresh.format("Last full refresh on %B %d, %Y at %I:%M %p");
 		refreshTime.setText(currTime);
@@ -96,6 +121,7 @@ public class MainActivity extends Activity {
 		controller = new FountainControlHandler(this);
 		refreshTime = (TextView)findViewById(R.id.text_refresh);
 		sendButton = (Button) findViewById(R.id.button_send);
+		patternSpinner = (Spinner) findViewById(R.id.spinner_pattern);
 		//Draw the fountain images
 		LinearLayout fountainCanvasLeft = (LinearLayout) findViewById(R.id.layout_canvas_left);
 		LinearLayout fountainCanvasRight = (LinearLayout) findViewById(R.id.layout_canvas_right);
