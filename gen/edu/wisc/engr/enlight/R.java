@@ -44,14 +44,14 @@ public final class R {
         public static final int toggle_colors=0x7f020007;
     }
     public static final class id {
-        public static final int action_settings=0x7f0a0024;
+        public static final int action_settings=0x7f0a0025;
         public static final int buttonLayout=0x7f0a0002;
         public static final int buttonList=0x7f0a0000;
-        public static final int button_give_control=0x7f0a0020;
+        public static final int button_give_control=0x7f0a0021;
         public static final int button_layout=0x7f0a000f;
-        public static final int button_refresh=0x7f0a001f;
+        public static final int button_refresh=0x7f0a0020;
         public static final int button_scroll=0x7f0a000e;
-        public static final int button_send=0x7f0a0021;
+        public static final int button_send=0x7f0a0022;
         public static final int canvas_left=0x7f0a000c;
         public static final int canvas_right=0x7f0a000d;
         public static final int current_text=0x7f0a0008;
@@ -66,10 +66,11 @@ public final class R {
         public static final int layout_canvas_right=0x7f0a001b;
         public static final int layout_control=0x7f0a0019;
         public static final int layout_pattern=0x7f0a0014;
-        public static final int myTitle=0x7f0a0023;
+        public static final int myTitle=0x7f0a0024;
         public static final int overview_text=0x7f0a0007;
         public static final int overview_view=0x7f0a0006;
         public static final int preset_text=0x7f0a0009;
+        public static final int progress_reload=0x7f0a001f;
         public static final int refresh_button=0x7f0a0012;
         public static final int refresh_last=0x7f0a0013;
         public static final int refresh_view=0x7f0a0001;
@@ -79,7 +80,7 @@ public final class R {
         public static final int text_control=0x7f0a001d;
         public static final int text_overview=0x7f0a0015;
         public static final int text_refresh=0x7f0a001e;
-        public static final int text_spinner_item=0x7f0a0022;
+        public static final int text_spinner_item=0x7f0a0023;
         public static final int view_pattern_center=0x7f0a0016;
     }
     public static final class layout {

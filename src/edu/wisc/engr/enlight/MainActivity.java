@@ -15,12 +15,14 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
 	FountainControlHandler controller;
@@ -39,8 +41,10 @@ public class MainActivity extends Activity {
 	Button sendButton;
 	ImageButton abdicateButton;
 	TextView refreshTime;
+	TextView statusText;
 	Spinner patternSpinner;
 	Timer refreshTimer;
+	ProgressBar reloadProgress;
 	FountainViewCanvas leftFountain;
 	FountainViewCanvas rightFountain;
 
@@ -59,7 +63,7 @@ public class MainActivity extends Activity {
 			public void run(){
 				TimerMethod();
 			}
-		}, 0, 5000);
+		}, 0, 2000);
 		doSetup();
 	}
 
@@ -69,6 +73,9 @@ public class MainActivity extends Activity {
 			public void run(){
 				//add a controller. method to refresh shit
 				controller.queryControl();
+				if (!hasControl){
+					controller.queryAllValves();
+				}
 			}
 		});
 	}
@@ -91,18 +98,8 @@ public class MainActivity extends Activity {
 		//Refresh the button checks
 		//Let the user know if they have control or not
 		Log.e("REFRESH", "REFRESH");
-		if (controlChanged && !hasControl){ //if they lost control since last refresh
-			controlChanged = false;
-			Toast controlToast = Toast.makeText(this, "You no longer have control", Toast.LENGTH_SHORT);
-			controlToast.show();
-			sendButton.setVisibility(View.GONE);
-			sendButton.setText("Request Control");
-		}
-		if (hasControl){
-			//Show the send button if it isn't already shown
-			sendButton.setVisibility(View.VISIBLE);
-			sendButton.setText("Release Control");
-		}
+
+
 		//get and set the patterns
 		if (patterns.size() == 0){
 			patterns.add(new Pattern(0, "Manual", true));
@@ -110,18 +107,16 @@ public class MainActivity extends Activity {
 		PatternSpinnerAdapter<Pattern> adapter = new PatternSpinnerAdapter<Pattern>(this, android.R.layout.simple_spinner_item, patterns);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		patternSpinner.setAdapter(adapter);
-		lastRefresh.setToNow();
-		String currTime = lastRefresh.format("Last full refresh on %B %d, %Y at %I:%M %p");
-		refreshTime.setText(currTime);
 	}
 
 	private void doSetup(){
-
+		statusText = (TextView) findViewById(R.id.text_control);
 		pDialog = new ProgressDialog(this);
 		controller = new FountainControlHandler(this);
 		refreshTime = (TextView)findViewById(R.id.text_refresh);
 		sendButton = (Button) findViewById(R.id.button_send);
 		patternSpinner = (Spinner) findViewById(R.id.spinner_pattern);
+		reloadProgress = (ProgressBar) findViewById(R.id.progress_reload);
 		//Draw the fountain images
 		LinearLayout fountainCanvasLeft = (LinearLayout) findViewById(R.id.layout_canvas_left);
 		LinearLayout fountainCanvasRight = (LinearLayout) findViewById(R.id.layout_canvas_right);
@@ -149,31 +144,36 @@ public class MainActivity extends Activity {
 							sum = sum + (int) Math.pow(2, valveNum);
 						}
 					}
-					controller.setAllValves(sum);
+					controller.releaseControl();
 					Log.e("Valve", "" + sum);
 					task.setValveRequest(sum);
 					task.execute("Hello");
-				}else{
+				}else if (!hasControl && !controlRequested){
 					controller.requestControl();
 				}
 
-				Log.e("Button", "Button pressed!");
 			}
 
 		});
-
-		sendButton.setOnClickListener(new OnClickListener(){
+		
+		patternSpinner.setOnItemSelectedListener(new OnItemSelectedListener(){
 
 			@Override
-			public void onClick(View arg0) {
-				if (!hasControl){
-					controller.requestControl();
-				}else{
-					controller.releaseControl();
-				}
+			public void onItemSelected(AdapterView<?> arg0, View arg1,
+					int arg2, long arg3) {
+				// TODO Auto-generated method stub
+				
 			}
 
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+				//do nothing I suppose
+			}
+			
 		});
+
+
 		//TODO once everything is set up, refresh the layout
 		refresh();
 	}

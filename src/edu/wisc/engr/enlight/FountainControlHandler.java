@@ -17,11 +17,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
 /**
  * This class controls the fountain control. Queries the server to see if the 
  * user can gain control and requests control from the server.
@@ -34,6 +34,7 @@ public class FountainControlHandler {
 	private MainActivity mActivity;
 	private String apiKey = "00000";
 	public boolean hasControl = false;
+	public boolean reqControl = false;
 	public int userId = -1;
 	public int userPosition = -1;
 	public int userPrio = -1;
@@ -47,11 +48,17 @@ public class FountainControlHandler {
 	public static final int SETSINGLEVALVE = 6;
 	public static final int GETPATTERN = 7;
 	public static final int SETPATTERN = 8;
+	FountainViewCanvas leftView;
+	FountainViewCanvas rightView;
+	ArrayList<Integer> userIDs;
+	ArrayList<UserEntry> queue;
 
 	public FountainControlHandler(Context c){
 		this.mContext = c;
 		this.mActivity = (MainActivity) c;
 		mDialog = mActivity.pDialog;
+		userIDs = new ArrayList<Integer>();
+		queue = new ArrayList<UserEntry>();
 	}
 
 	//TODO
@@ -68,7 +75,7 @@ public class FountainControlHandler {
 		isLast = true;
 		queryAllValves();
 	}
-	
+
 
 	/**
 	 * This method is called to request control from the fountain.
@@ -151,7 +158,7 @@ public class FountainControlHandler {
 		valveTask.addNVP(new BasicNameValuePair("spraying", "" + on));
 		valveTask.execute(Utilities.valvesURL + "/" + valveID);
 	}
-	
+
 	/**
 	 * This method is used to get all the available patterns, as well as 
 	 * the currently active pattern (if there is any)
@@ -162,7 +169,7 @@ public class FountainControlHandler {
 		patternTask.isPost = false;
 		patternTask.execute(Utilities.allPatternsURL);
 	}
-	
+
 	/**
 	 * This method is used to set a certain pattern.
 	 * @param id The id of the pattern.
@@ -197,9 +204,9 @@ public class FountainControlHandler {
 		}
 		@Override
 		protected void onPreExecute(){
-			mActivity.pDialog.show();
+			mActivity.reloadProgress.setVisibility(View.VISIBLE);
 		}
-		
+
 		@Override
 		protected HttpResponse doInBackground(String... arg0) {
 			if (isPost){
@@ -236,6 +243,7 @@ public class FountainControlHandler {
 			if (response == null){
 				//bad request, check internet connection
 				mActivity.pDialog.hide();
+				mActivity.reloadProgress.setVisibility(View.INVISIBLE);
 				return;
 			}
 			try{
@@ -245,40 +253,139 @@ public class FountainControlHandler {
 				JSONArray finalResult = new JSONArray(tokener);
 				JSONObject currJSON;
 				boolean success;
+				int priority;
+				int id;
+				int acquired;
+				int expires;
+				int position;
 				//TODO
 				switch (requestControl){
 				case REQUESTCONTROL:	
+					//TODO
+					currJSON = finalResult.getJSONObject(0);
+					success = currJSON.getBoolean("success");
+					priority = currJSON.getInt("priority");
+					expires = currJSON.getInt("expires");
+					id = currJSON.getInt("controllerID");
+					position = currJSON.getInt("queuePosition");
+					//now that we have the data, make sure we remember it
+					if (success){
+						userIDs.add(id);
+						reqControl = true;
+						if (position == 0){
+							//got control right when we requested it
+							hasControl = true;
+							mActivity.hasControl = true;
+							mActivity.rightFountain.hasControl = true;
+							mActivity.leftFountain.hasControl = true;
+							mActivity.statusText.setText("You Have Control");
+							mActivity.refreshTime.setText("Tap a valve to activate it or send a pattern.");
+							mActivity.sendButton.setText("Release Control");
+						}else{
+							reqControl = true;
+							mActivity.hasControl = false;
+							mActivity.rightFountain.hasControl = false;
+							mActivity.leftFountain.hasControl = false;
+							mActivity.statusText.setText("Waiting for Control");
+							mActivity.refreshTime.setText("Another user has control. Please wait.");
+							mActivity.controlRequested = true;
+							mActivity.sendButton.setText("Please Wait");
+						}
+					}
+					
 					break;
 				case QUERYCONTROL:
-					UserQueue queue = new UserQueue();
-					queue.deviceID = userId;
-					queue.devicePos = userPosition;
-					queue.devicePrio = userPrio;
+					queue.clear();
 					for (int i = 0; i < finalResult.length(); i++){
 						currJSON = finalResult.getJSONObject(i);
-						int id = currJSON.getInt("controllerID");
-						int acquired = currJSON.getInt("acquired");
-						int expires = currJSON.getInt("expires");
-						int priority = currJSON.getInt("priority");
-						int position = currJSON.getInt("queuePosition");
-						queue.addUser(new UserEntry(id, acquired, expires, priority, position));
+						id = currJSON.getInt("controllerID");
+						acquired = currJSON.getInt("acquired");
+						expires = currJSON.getInt("expires");
+						priority = currJSON.getInt("priority");
+						position = currJSON.getInt("queuePosition");
+						queue.add(new UserEntry(id, acquired, expires, priority, position));
 						//TODO build a queue AND SET THE ACTIVITY'S QUEUE TO THIS
 					}
-					mActivity.userQueue = queue;
+					//Now that we have the queue, see if any of our userids are in the queue
+					int bestPosition = Integer.MAX_VALUE;
+					ArrayList<Integer> newList = new ArrayList<Integer>();
+					//find any entries matching one of our user ids in the list
+					for (int i = 0; i < userIDs.size(); i++){
+						boolean found = false;
+						for (int j = 0; i < queue.size(); i++){
+							if (queue.get(j).id == userIDs.get(i)){
+								//we found a user
+								found = true;
+								//see if this is the best position found
+								if (queue.get(j).position < bestPosition){
+									bestPosition = queue.get(j).position;
+								}
+							}
+						}
+						if (found){
+							//old id, add to old id list
+							newList.add(i);
+						}
+					}
+					if (bestPosition == Integer.MAX_VALUE){
+						//control isn't even requested
+						reqControl = false;
+						mActivity.hasControl = false;
+						mActivity.rightFountain.hasControl = false;
+						mActivity.leftFountain.hasControl = false;
+						mActivity.statusText.setText("Fountain Status");
+						mActivity.refreshTime.setText("Request control to gain access.");
+						mActivity.controlRequested = false;
+						mActivity.sendButton.setText("Request Control");
+					}else if (bestPosition > 0){
+						reqControl = true;
+						mActivity.hasControl = false;
+						mActivity.rightFountain.hasControl = false;
+						mActivity.leftFountain.hasControl = false;
+						mActivity.statusText.setText("Waiting for Control");
+						mActivity.refreshTime.setText("Another user has control. Please wait.");
+						mActivity.controlRequested = true;
+						mActivity.sendButton.setText("Please Wait");
+					}else if (bestPosition == 0){
+						hasControl = true;
+						mActivity.hasControl = true;
+						mActivity.rightFountain.hasControl = true;
+						mActivity.leftFountain.hasControl = true;
+						mActivity.statusText.setText("You Have Control");
+						mActivity.refreshTime.setText("Tap a valve to activate it or send a pattern.");
+						mActivity.sendButton.setText("Release Control");
+					}
+					//reassign the list with old id's removed
+					userIDs = newList;
+
 					break;
 				case RELEASECONTROL:
 					currJSON = finalResult.getJSONObject(0);
 					success = currJSON.getBoolean("success");
 					if (!success){
 						//TODO some error message
+					}else{
+						//Make sure the canvas knows that control is lost
+						hasControl = false;
+						mActivity.hasControl = false;
+						mActivity.rightFountain.hasControl = false;
+						mActivity.leftFountain.hasControl = false;
+						mActivity.statusText.setText("Fountain Status");
+						mActivity.refreshTime.setText("Request control to gain access.");
 					}
 					break;
 				case QUERYALLVALVES:
 					for (int i = 0; i < finalResult.length(); i++){
 						currJSON = finalResult.getJSONObject(i);
-						int id = currJSON.getInt("id");
+						id = currJSON.getInt("id");
 						boolean spraying = currJSON.getBoolean("spraying");
 						mActivity.valveStates[id - 1] = spraying;
+						
+					}
+					if (!hasControl){
+						//refresh the canvas views if the user doesn't have control
+						mActivity.leftFountain.setValves(mActivity.valveStates);
+						mActivity.rightFountain.setValves(mActivity.valveStates);
 					}
 					break;
 				case SETALLVALVES:
@@ -290,7 +397,7 @@ public class FountainControlHandler {
 					break;
 				case QUERYSINGLEVALVE:
 					currJSON = finalResult.getJSONObject(0);
-					int id = currJSON.getInt("id");
+					id = currJSON.getInt("id");
 					boolean spraying = currJSON.getBoolean("spraying");
 					mActivity.valveStates[id - 1] = spraying;
 					break;
@@ -312,6 +419,7 @@ public class FountainControlHandler {
 						patterns.add(new Pattern(patternID, patternName, isActive));
 					}
 					mActivity.patterns = patterns;
+					mActivity.refresh();
 					//TODO now that we have all these patterns do something
 					//with it (most likely in the activity)
 					break;
@@ -332,6 +440,7 @@ public class FountainControlHandler {
 			}finally{
 				if (isLast){
 					mActivity.refresh();
+					mActivity.reloadProgress.setVisibility(View.INVISIBLE);
 					mActivity.pDialog.hide();
 					Log.e("Pdialog", "HIDE");
 				}

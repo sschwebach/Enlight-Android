@@ -20,6 +20,8 @@ public class FountainViewCanvas extends View{
 	int badgerRed = 0xffb70101;
 	int cream = 0xFF6E6A5B;
 	int darkGrey = 0xFFC8C5BB;
+	boolean hasControl = true;
+	Context context;
 	Canvas mCanvas;
 	int height;
 	int width;
@@ -32,6 +34,7 @@ public class FountainViewCanvas extends View{
 	boolean left;
 	RectF rectOuter;
 	RectF rectInner;
+	FountainControlHandler controller;
 	public boolean[] buttonPressed;
 
 	public FountainViewCanvas(Context context, boolean left){
@@ -43,7 +46,7 @@ public class FountainViewCanvas extends View{
 		paint.setStrokeWidth(4.5f);
 		paintCyan.setAntiAlias(true);
 		paintCyan.setColor(badgerRed);
-
+		this.context = context;
 		paintCyan.setStyle(Paint.Style.FILL);
 		//TODO set the color to the same one as the xml layout
 		paintBlack.setAntiAlias(true);
@@ -89,16 +92,7 @@ public class FountainViewCanvas extends View{
 			rectInner.set(centerX - radiusInner, centerY - radiusInner, centerX + radiusInner, centerY + radiusInner);
 			setup = true;
 		}
-		//draw the circles
-		if (left){
-			canvas.drawArc(rectOuter, 90, 180, false, paint);
-			canvas.drawArc(rectInner, 90, 180, false, paint);
 
-		}else{
-			canvas.drawArc(rectOuter, -90, 180, false, paint);
-			canvas.drawArc(rectInner, -90, 180, false, paint);
-
-		}
 
 		//draw any views that are filled in
 		for (int i = 1; i <= 12; i++){
@@ -132,6 +126,14 @@ public class FountainViewCanvas extends View{
 			}
 		}
 
+		//Lastly, draw an arc in the center to get rid of a few things...
+		if (left){
+			canvas.drawArc(rectInner, 89, 182, true, paintBlack);
+
+		}else{
+			canvas.drawArc(rectInner, -91, 182, true, paintBlack);
+		}
+
 		//draw the rest of the outline
 		canvas.drawLine(centerX, centerY - radiusOuter, centerX, centerY - radiusInner, paint);
 		canvas.drawLine(centerX, centerY + radiusInner, centerX, centerY + radiusOuter, paint);
@@ -160,13 +162,17 @@ public class FountainViewCanvas extends View{
 			}
 
 		}
-		//Lastly, draw an arc in the center to get rid of a few things...
+		//draw the circles
 		if (left){
-			canvas.drawArc(rectInner, 89, 182, true, paintBlack);
+			canvas.drawArc(rectOuter, 90, 180, false, paint);
+			canvas.drawArc(rectInner, 90, 180, false, paint);
 
 		}else{
-			canvas.drawArc(rectInner, -91, 182, true, paintBlack);
+			canvas.drawArc(rectOuter, -90, 180, false, paint);
+			canvas.drawArc(rectInner, -90, 180, false, paint);
+
 		}
+
 
 
 
@@ -220,16 +226,42 @@ public class FountainViewCanvas extends View{
 	@Override
 	public boolean onTouchEvent(MotionEvent e){
 		if ((e.getAction() & MotionEvent.ACTION_DOWN) == MotionEvent.ACTION_DOWN){
-			float xLoc = e.getX();
-			float yLoc = e.getY();
-			int buttonNum = detectButton(xLoc, yLoc);
-			if (buttonNum > 0){
-				Log.e("BUTTON", "" + buttonNum);
-				this.invalidate();
+			if (hasControl){
+				if (controller == null){
+					controller = ((MainActivity) context).controller;
+				}
+				float xLoc = e.getX();
+				float yLoc = e.getY();
+				int buttonNum = detectButton(xLoc, yLoc);
+				if (buttonNum > 0){
+					Log.e("BUTTON", "" + buttonNum);
+					this.invalidate();
+					//send the server request
+					if (left){
+						controller.setSingleValve(13 - buttonNum, buttonPressed[buttonNum - 1]);
+					}else{
+						controller.setSingleValve(25 - buttonNum, buttonPressed[buttonNum - 1]);
+					}
+				}
 			}
 		}
 		return super.onTouchEvent(e);
 
+	}
+
+	public void setValves(boolean[] states){
+		if (left){
+			//we're interested in entries 0 to 11
+			for (int i = 0; i < 12; i++){
+				buttonPressed[11 - i] = states[i];	
+			}
+		}else{
+			//we're interested in entries 12 to 23
+			for (int i = 12; i < 24; i++){
+				buttonPressed[23 - i] = states[i];
+			}
+		}
+		this.invalidate();
 	}
 
 }
