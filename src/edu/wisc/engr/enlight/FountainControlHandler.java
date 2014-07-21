@@ -246,11 +246,12 @@ public class FountainControlHandler {
 				mActivity.reloadProgress.setVisibility(View.INVISIBLE);
 				return;
 			}
+			JSONArray finalResult = new JSONArray();
 			try{
 				BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
 				String json = reader.readLine();
 				JSONTokener tokener = new JSONTokener(json);
-				JSONArray finalResult = new JSONArray(tokener);
+				finalResult = new JSONArray(tokener);
 				JSONObject currJSON;
 				boolean success;
 				int priority;
@@ -273,23 +274,11 @@ public class FountainControlHandler {
 						userIDs.add(id);
 						reqControl = true;
 						if (position == 0){
+							changeControl(true, true);
 							//got control right when we requested it
-							hasControl = true;
-							mActivity.hasControl = true;
-							mActivity.rightFountain.hasControl = true;
-							mActivity.leftFountain.hasControl = true;
-							mActivity.statusText.setText("You Have Control");
-							mActivity.refreshTime.setText("Tap a valve to activate it or send a pattern.");
-							mActivity.sendButton.setText("Release Control");
 						}else{
-							reqControl = true;
-							mActivity.hasControl = false;
-							mActivity.rightFountain.hasControl = false;
-							mActivity.leftFountain.hasControl = false;
-							mActivity.statusText.setText("Waiting for Control");
-							mActivity.refreshTime.setText("Another user has control. Please wait.");
-							mActivity.controlRequested = true;
-							mActivity.sendButton.setText("Please Wait");
+							changeControl(false, true);
+							//control requested
 						}
 					}
 					
@@ -328,32 +317,13 @@ public class FountainControlHandler {
 						}
 					}
 					if (bestPosition == Integer.MAX_VALUE){
-						//control isn't even requested
-						reqControl = false;
-						mActivity.hasControl = false;
-						mActivity.rightFountain.hasControl = false;
-						mActivity.leftFountain.hasControl = false;
-						mActivity.statusText.setText("Fountain Status");
-						mActivity.refreshTime.setText("Request control to gain access.");
-						mActivity.controlRequested = false;
-						mActivity.sendButton.setText("Request Control");
+						changeControl(false, false);
 					}else if (bestPosition > 0){
-						reqControl = true;
-						mActivity.hasControl = false;
-						mActivity.rightFountain.hasControl = false;
-						mActivity.leftFountain.hasControl = false;
-						mActivity.statusText.setText("Waiting for Control");
-						mActivity.refreshTime.setText("Another user has control. Please wait.");
-						mActivity.controlRequested = true;
-						mActivity.sendButton.setText("Please Wait");
+						changeControl(false, true);
+						//control has been requested, but is not acquired
 					}else if (bestPosition == 0){
-						hasControl = true;
-						mActivity.hasControl = true;
-						mActivity.rightFountain.hasControl = true;
-						mActivity.leftFountain.hasControl = true;
-						mActivity.statusText.setText("You Have Control");
-						mActivity.refreshTime.setText("Tap a valve to activate it or send a pattern.");
-						mActivity.sendButton.setText("Release Control");
+						changeControl(true, true);
+						//control is acquired
 					}
 					//reassign the list with old id's removed
 					userIDs = newList;
@@ -365,13 +335,7 @@ public class FountainControlHandler {
 					if (!success){
 						//TODO some error message
 					}else{
-						//Make sure the canvas knows that control is lost
-						hasControl = false;
-						mActivity.hasControl = false;
-						mActivity.rightFountain.hasControl = false;
-						mActivity.leftFountain.hasControl = false;
-						mActivity.statusText.setText("Fountain Status");
-						mActivity.refreshTime.setText("Request control to gain access.");
+						changeControl(false, true);
 					}
 					break;
 				case QUERYALLVALVES:
@@ -437,14 +401,59 @@ public class FountainControlHandler {
 				//do something with this result
 			}catch (Exception e){
 				Log.e("Exception", e.toString());
+				Log.e("JSON", finalResult.toString());
 			}finally{
 				if (isLast){
-					mActivity.refresh();
+					//mActivity.refresh();
 					mActivity.reloadProgress.setVisibility(View.INVISIBLE);
 					mActivity.pDialog.hide();
-					Log.e("Pdialog", "HIDE");
 				}
 			}
+		}
+	}
+	
+	/**
+	 * Updates the UI whenever control changes
+	 * @param hasControl if the user has control
+	 * @param reqControl if the user has requested control regardless if they
+	 * have it
+	 */
+	public void changeControl(boolean hasControl, boolean reqControl){
+		if (!hasControl && !reqControl){
+			//control isn't even requested
+			this.reqControl = false;
+			this.hasControl = false;
+			mActivity.patternSpinner.setVisibility(View.GONE);
+			mActivity.hasControl = false;
+			mActivity.rightFountain.hasControl = false;
+			mActivity.leftFountain.hasControl = false;
+			mActivity.statusText.setText("Fountain Status");
+			mActivity.refreshTime.setText("Request control to gain access.");
+			mActivity.controlRequested = false;
+			mActivity.sendButton.setText("Request Control");
+		}else if (!hasControl && reqControl){
+			//control has been requested, but is not acquired
+			this.reqControl = true;
+			this.hasControl = false;
+			mActivity.patternSpinner.setVisibility(View.GONE);
+			mActivity.hasControl = false;
+			mActivity.rightFountain.hasControl = false;
+			mActivity.leftFountain.hasControl = false;
+			mActivity.statusText.setText("Waiting for Control");
+			mActivity.refreshTime.setText("Another user has control. Please wait.");
+			mActivity.controlRequested = true;
+			mActivity.sendButton.setText("Please Wait");
+		}else{
+			//control is acquired
+			this.hasControl = true;
+			this.reqControl = reqControl;
+			mActivity.patternSpinner.setVisibility(View.VISIBLE);
+			mActivity.hasControl = true;
+			mActivity.rightFountain.hasControl = true;
+			mActivity.leftFountain.hasControl = true;
+			mActivity.statusText.setText("You Have Control");
+			mActivity.refreshTime.setText("Tap a valve to activate it or send a pattern.");
+			mActivity.sendButton.setText("Release Control");
 		}
 	}
 

@@ -9,6 +9,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -30,6 +31,7 @@ public class MainActivity extends Activity {
 	boolean controlRequested = false;
 	boolean inQueue = false;
 	boolean controlChanged = false;
+	boolean isRunning = true;
 	boolean[] valveStates = new boolean[24];
 	ProgressDialog pDialog;
 	Time lastRefresh;
@@ -67,14 +69,52 @@ public class MainActivity extends Activity {
 		doSetup();
 	}
 
+	@Override
+	protected void onPause(){
+		super.onPause();
+		isRunning = false;
+		Log.e("ONPAUSE", "PAUSE");
+		this.refreshTimer.cancel();
+	}
+
+	@Override
+	protected void onResume(){
+		super.onResume();
+		isRunning = true;
+		this.refreshTimer = new Timer();
+		this.refreshTimer.schedule(new TimerTask(){
+			@Override
+			public void run(){
+				TimerMethod();
+			}
+		}, 0, 2000);
+	}
+	
+	@Override
+	protected void onStop(){
+		super.onStop();
+		isRunning = false;
+		this.refreshTimer.cancel();
+	}
+	
+	@Override
+	protected void onDestroy(){
+		super.onDestroy();
+		isRunning = false;
+		this.refreshTimer.cancel();
+	}
+
 	private void TimerMethod(){
 		this.runOnUiThread(new Runnable(){
 			@Override
 			public void run(){
 				//add a controller. method to refresh shit
-				controller.queryControl();
-				if (!hasControl){
-					controller.queryAllValves();
+				PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+				if (pm.isScreenOn() && isRunning){
+					controller.queryControl();
+					if (!hasControl){
+						controller.queryAllValves();
+					}
 				}
 			}
 		});
@@ -155,14 +195,14 @@ public class MainActivity extends Activity {
 			}
 
 		});
-		
+
 		patternSpinner.setOnItemSelectedListener(new OnItemSelectedListener(){
 
 			@Override
 			public void onItemSelected(AdapterView<?> arg0, View arg1,
 					int arg2, long arg3) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
@@ -170,7 +210,7 @@ public class MainActivity extends Activity {
 				// TODO Auto-generated method stub
 				//do nothing I suppose
 			}
-			
+
 		});
 
 
