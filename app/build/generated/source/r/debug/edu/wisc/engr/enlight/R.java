@@ -91,8 +91,11 @@ public final class R {
         public static final int action_settings=0x7f070000;
         public static final int app_name=0x7f070001;
         public static final int enlight_welcome=0x7f070002;
-        public static final int hello_world=0x7f070003;
-        public static final int home_page=0x7f070004;
+        public static final int hello_round=0x7f070003;
+        public static final int hello_square=0x7f070004;
+        public static final int hello_world=0x7f070005;
+        public static final int home_page=0x7f070006;
+        public static final int title_activity_main_activity_wear=0x7f070007;
     }
     public static final class style {
         /** 

@@ -94,9 +94,9 @@
             <file
                 path="C:\Users\Sam\AndroidstudioProjects\Enlight-Android\app\src\main\res\values\colors.xml"
                 qualifiers="" >
-                <color name="textcolorgold" >#b70101
-                </color>
                 <color name="badgerred" >#b70101
+                </color>
+                <color name="textcolorgold" >#b70101
                 </color>
                 <color name="titlebackgroundcolor" >#b70101
                 </color>
@@ -106,9 +106,9 @@
                 </color>
                 <color name="textcolor" >#000000
                 </color>
-                <color name="cream" >#6E6A5B
-                </color>
                 <color name="titletextcolor" >#FFFFFF
+                </color>
+                <color name="cream" >#6E6A5B
                 </color>
             </file>
             <file
@@ -122,6 +122,8 @@
             <file
                 path="C:\Users\Sam\AndroidstudioProjects\Enlight-Android\app\src\main\res\values\strings.xml"
                 qualifiers="" >
+                <string name="hello_square" >Hello Square World!
+                </string>
                 <string name="action_settings" >Settings
                 </string>
                 <string name="enlight_welcome" >Enlight! Yay!
@@ -129,6 +131,10 @@
                 <string name="app_name" >Enlight - Android
                 </string>
                 <string name="home_page" >Maquina Home
+                </string>
+                <string name="hello_round" >Hello Round World!
+                </string>
+                <string name="hello_world" >Hello world!
                 </string>
 
                 <string-array name="preset_array" >
@@ -149,7 +155,7 @@ Off
                     </item>
                 </string-array>
 
-                <string name="hello_world" >Hello world!
+                <string name="title_activity_main_activity_wear" >MainActivityWear
                 </string>
             </file>
             <file
@@ -193,17 +199,6 @@ Off
                 </style>
 
                 <style
-                    name="MyActionBar"
-                    parent="@android:style/Widget.Holo.ActionBar" >
-                    <item name="android:background">
-@color/titlebackgroundcolor
-                    </item>
-                    <item name="android:titleTextStyle">
-@style/MyActionBarTitleText
-                    </item>
-                </style>
-
-                <style
                     name="CustomActionBarTheme"
                     parent="@android:style/Theme.Holo" >
                     <item name="android:actionBarStyle">
@@ -211,6 +206,17 @@ Off
                     </item>
                     <item name="android:actionMenuTextColor">
 @color/actionbartext
+                    </item>
+                </style>
+
+                <style
+                    name="MyActionBar"
+                    parent="@android:style/Widget.Holo.ActionBar" >
+                    <item name="android:background">
+@color/titlebackgroundcolor
+                    </item>
+                    <item name="android:titleTextStyle">
+@style/MyActionBarTitleText
                     </item>
                 </style>
             </file>
