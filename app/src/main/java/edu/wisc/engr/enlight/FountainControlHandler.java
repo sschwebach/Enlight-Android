@@ -199,7 +199,7 @@ public class FountainControlHandler {
 	/**
 	 * A setter method for APIKey. In android it's probably better to just 
 	 * do it directly, so it probably won't be used.
-	 * @param newKey
+	 * @param newKey the new API key to be set
 	 */
 	public void setApiKey(String newKey){
 		this.apiKey = newKey;
@@ -237,25 +237,21 @@ public class FountainControlHandler {
 					post.setEntity(se);
 					HttpResponse response = client.execute(post);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
-                    String json = reader.readLine();
-					return json;
+                    return reader.readLine();
 				}catch (Exception e){
 					Log.e("Exception", e.toString());
 				}
-			}else if (!isPost){
+			}else {
 				//query task
 				try {
 					HttpClient client = new DefaultHttpClient();
 					HttpGet get = new HttpGet(arg0[0]);
 					HttpResponse response = client.execute(get);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
-                    String json = reader.readLine();
-					return json;
+                    return reader.readLine();
 				} catch (Exception e) {
 					Log.e("BackgroundTaskException", e.toString());
 				}
-			}else{
-				Log.e("TaskError", "Task executed in a bad state");
 			}
 			return null;
 		}
@@ -264,7 +260,7 @@ public class FountainControlHandler {
 		protected void onPostExecute(String response){
 			pairs.clear();
             if (response != null){
-                Log.e("RESPONSE", requestControl + response.toString());
+                Log.e("RESPONSE", requestControl + response);
             }
 
 
@@ -337,16 +333,16 @@ public class FountainControlHandler {
 					//find any entries matching one of our user ids in the list
 					for (int i = 0; i < userIDs.size(); i++){
 						boolean found = false;
-						for (int j = 0; j < queue.size(); j++){
-							if (queue.get(j).id == userIDs.get(i)){
-								//we found a user
-								found = true;
-								//see if this is the best position found
-								if (queue.get(j).position < bestPosition){
-									bestPosition = queue.get(j).position;
-								}
-							}
-						}
+                        for (UserEntry aQueue : queue) {
+                            if (aQueue.id == userIDs.get(i)) {
+                                //we found a user
+                                found = true;
+                                //see if this is the best position found
+                                if (aQueue.position < bestPosition) {
+                                    bestPosition = aQueue.position;
+                                }
+                            }
+                        }
 						if (found){
 							//old id, add to old id list
 							newList.add(i);
@@ -373,7 +369,7 @@ public class FountainControlHandler {
                     if (success && trueQueuePos == 0){
                         //got control
                         changeControl(true, true);
-                    }else if (success && trueQueuePos != 0){
+                    }else if (success){
                         //still dont' have control, but has been requested
                         changeControl(false, true);
                     }else{
@@ -395,11 +391,7 @@ public class FountainControlHandler {
 						currJSON = finalResult.getJSONObject(i);
 						id = currJSON.getInt("ID");
 						int spraying = currJSON.getInt("spraying"); //fuck the police
-                        if (spraying == 1){
-                            mActivity.valveStates[id - 1] = true;
-                        }else{
-                            mActivity.valveStates[id - 1] = false;
-                        }
+                        mActivity.valveStates[id - 1] = spraying == 1;
 						
 					}
 					if (!hasControl){
@@ -487,7 +479,7 @@ public class FountainControlHandler {
 			mActivity.refreshTime.setText("Request control to gain access.");
 			mActivity.controlRequested = false;
 			mActivity.sendButton.setText("Request Control");
-		}else if (!hasControl && reqControl){
+		}else if (!hasControl){
 			//control has been requested, but is not acquired
 			this.reqControl = true;
 			this.hasControl = false;

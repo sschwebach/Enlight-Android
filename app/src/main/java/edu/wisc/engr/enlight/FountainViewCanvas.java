@@ -3,24 +3,21 @@ package edu.wisc.engr.enlight;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.graphics.Shader;
-import android.graphics.SweepGradient;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 public class FountainViewCanvas extends View{
-	Paint paint = new Paint();
-	Paint paintCyan = new Paint();
-	Paint paintBlack = new Paint();
+	Paint paintLine = new Paint();
+	Paint paintFill = new Paint();
+	Paint paintWhite = new Paint();
 	int badgerGold = 0xffe7d9c1;
 	int badgerRed = 0xffb70101;
 	int cream = 0xFF6E6A5B;
 	int darkGrey = 0xFFC8C5BB;
-	boolean hasControl = true;
+	boolean hasControl = false;
 	Context context;
 	Canvas mCanvas;
 	int height;
@@ -40,18 +37,18 @@ public class FountainViewCanvas extends View{
 	public FountainViewCanvas(Context context, boolean left){
 		super(context);
 		this.left = left;
-		paint.setAntiAlias(true);
-		paint.setColor(Color.BLACK);
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(4.5f);
-		paintCyan.setAntiAlias(true);
-		paintCyan.setColor(badgerRed);
+		paintLine.setAntiAlias(true);
+		paintLine.setColor(Color.BLACK);
+		paintLine.setStyle(Paint.Style.STROKE);
+		paintLine.setStrokeWidth(4.5f);
+		paintFill.setAntiAlias(true);
+		paintFill.setColor(badgerRed);
 		this.context = context;
-		paintCyan.setStyle(Paint.Style.FILL);
+		paintFill.setStyle(Paint.Style.FILL);
 		//TODO set the color to the same one as the xml layout
-		paintBlack.setAntiAlias(true);
-		paintBlack.setColor(Color.WHITE);
-		paintBlack.setStyle(Paint.Style.FILL);
+		paintWhite.setAntiAlias(true);
+		paintWhite.setColor(Color.WHITE);
+		paintWhite.setStyle(Paint.Style.FILL);
 		buttonPressed = new boolean[12];
 
 
@@ -103,11 +100,11 @@ public class FountainViewCanvas extends View{
 				RectF fill = new RectF();
 				fill.set(centerX - radiusOuter, centerY - radiusOuter, centerX + radiusOuter, centerY + radiusOuter);
 				if (buttonPressed[i-1]){
-					paintCyan.setColor(badgerRed);
+					paintFill.setColor(badgerRed);
 				}else{
-					paintCyan.setColor(darkGrey);
+					paintFill.setColor(darkGrey);
 				}
-				canvas.drawArc(fill, (float) (angleStart*180/Math.PI), (float) ((angleEnd - angleStart)*180/Math.PI), true, paintCyan);
+				canvas.drawArc(fill, (float) (angleStart*180/Math.PI), (float) ((angleEnd - angleStart)*180/Math.PI), true, paintFill);
 
 
 			}else{
@@ -117,26 +114,26 @@ public class FountainViewCanvas extends View{
 				RectF fill = new RectF();
 				fill.set(centerX - radiusOuter, centerY - radiusOuter, centerX + radiusOuter, centerY + radiusOuter);
 				if (buttonPressed[i-1]){
-					paintCyan.setColor(badgerRed);
+					paintFill.setColor(badgerRed);
 				}else{
-					paintCyan.setColor(darkGrey);
+					paintFill.setColor(darkGrey);
 				}
-				canvas.drawArc(fill, (float) (angleStart*180/Math.PI), (float) ((angleEnd - angleStart)*180/Math.PI), true, paintCyan);
+				canvas.drawArc(fill, (float) (angleStart*180/Math.PI), (float) ((angleEnd - angleStart)*180/Math.PI), true, paintFill);
 
 			}
 		}
 
 		//Lastly, draw an arc in the center to get rid of a few things...
 		if (left){
-			canvas.drawArc(rectInner, 89, 182, true, paintBlack);
+			canvas.drawArc(rectInner, 89, 182, true, paintWhite);
 
 		}else{
-			canvas.drawArc(rectInner, -91, 182, true, paintBlack);
+			canvas.drawArc(rectInner, -91, 182, true, paintWhite);
 		}
 
 		//draw the rest of the outline
-		canvas.drawLine(centerX, centerY - radiusOuter, centerX, centerY - radiusInner, paint);
-		canvas.drawLine(centerX, centerY + radiusInner, centerX, centerY + radiusOuter, paint);
+		canvas.drawLine(centerX, centerY - radiusOuter, centerX, centerY - radiusInner, paintLine);
+		canvas.drawLine(centerX, centerY + radiusInner, centerX, centerY + radiusOuter, paintLine);
 		//Draw the division lines TIME FOR MATH
 		for (int i = 1; i < 12; i++){
 			float angle;
@@ -151,25 +148,25 @@ public class FountainViewCanvas extends View{
 				startY = (float) (centerY + Math.sin(angle) * radiusInner);
 				endX = (float) (centerX + Math.cos(angle)*radiusOuter);
 				endY = (float) (centerY + Math.sin(angle) * radiusOuter);
-				canvas.drawLine(startX, startY, endX, endY, paint);
+				canvas.drawLine(startX, startY, endX, endY, paintLine);
 			}else{
 				angle = (float) (Math.PI/2 - (Math.PI/12) * i);
 				startX = (float) (centerX + Math.cos(angle)*radiusInner);
 				startY = (float) (centerY + Math.sin(angle) * radiusInner);
 				endX = (float) (centerX + Math.cos(angle)*radiusOuter);
 				endY = (float) (centerY + Math.sin(angle) * radiusOuter);
-				canvas.drawLine(startX, startY, endX, endY, paint);
+				canvas.drawLine(startX, startY, endX, endY, paintLine);
 			}
 
 		}
 		//draw the circles
 		if (left){
-			canvas.drawArc(rectOuter, 90, 180, false, paint);
-			canvas.drawArc(rectInner, 90, 180, false, paint);
+			canvas.drawArc(rectOuter, 90, 180, false, paintLine);
+			canvas.drawArc(rectInner, 90, 180, false, paintLine);
 
 		}else{
-			canvas.drawArc(rectOuter, -90, 180, false, paint);
-			canvas.drawArc(rectInner, -90, 180, false, paint);
+			canvas.drawArc(rectOuter, -90, 180, false, paintLine);
+			canvas.drawArc(rectInner, -90, 180, false, paintLine);
 
 		}
 
@@ -230,6 +227,7 @@ public class FountainViewCanvas extends View{
 				if (controller == null){
 					controller = ((MainActivity) context).controller;
 				}
+                //Get the location of  the
 				float xLoc = e.getX();
 				float yLoc = e.getY();
 				int buttonNum = detectButton(xLoc, yLoc);

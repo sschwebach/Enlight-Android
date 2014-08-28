@@ -10,5 +10,7 @@ public class Utilities {
 	static final public String valvesURL = baseURL + "/valves";
 	static final public String allPatternsURL = baseURL + "/patterns";
 	static final public String singlePatternsURL = baseURL + "/pattern";
+    static final public int[] buttonToValveMap = {12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}; //A mapping of the valve button to its actual valve
+    static final public int[] valveToButtonMap = {}; //A mapping of the valves values back to the buttons
 			
 }
