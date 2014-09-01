@@ -56,6 +56,7 @@ public class FountainControlHandler {
 	FountainViewCanvas leftView;
 	FountainViewCanvas rightView;
 	ArrayList<Integer> userIDs;
+    int currID;
 	ArrayList<UserEntry> queue;
 
 	public FountainControlHandler(Context c){
@@ -270,13 +271,7 @@ public class FountainControlHandler {
 				mActivity.reloadProgress.setVisibility(View.INVISIBLE);
 				return;
 			}
-			JSONArray finalResult = new JSONArray();
             JSONObject finalObject = new JSONObject();
-            try{
-                finalResult = new JSONArray(response);
-            }catch (JSONException e){
-                //must be a single object?
-            }
             try{
                 finalObject = new JSONObject(response);
             }catch (JSONException e){
@@ -317,8 +312,11 @@ public class FountainControlHandler {
 					break;
 				case QUERYCONTROL:
 					queue.clear();
-					for (int i = 0; i < finalResult.length(); i++){
-						currJSON = finalResult.getJSONObject(i);
+                    currJSON = finalObject;
+                    success = currJSON.getBoolean("success");
+                    JSONArray queueArray = currJSON.getJSONArray("items");
+					for (int i = 0; i < queueArray.length(); i++){
+						currJSON = queueArray.getJSONObject(i);
 						id = currJSON.getInt("controllerID");
 						acquired = currJSON.getInt("acquire");
 						expires = currJSON.getInt("ttl");
@@ -362,7 +360,7 @@ public class FountainControlHandler {
 
 					break;
                 case QUERYPOSITION:
-                    currJSON = finalResult.getJSONObject(0);
+                    currJSON = finalObject;
                     success = currJSON.getBoolean("success");
                     int trueQueuePos = currJSON.getInt("trueQueuePosition");
                     int eta = currJSON.getInt("eta");
@@ -378,7 +376,7 @@ public class FountainControlHandler {
                     }
                     break;
 				case RELEASECONTROL:
-					currJSON = finalResult.getJSONObject(0);
+					currJSON = finalObject;
 					success = currJSON.getBoolean("success");
 					if (!success){
 						//TODO some error message
@@ -387,11 +385,16 @@ public class FountainControlHandler {
 					}
 					break;
 				case QUERYALLVALVES:
-					for (int i = 0; i < finalResult.length(); i++){
-						currJSON = finalResult.getJSONObject(i);
-						id = currJSON.getInt("ID");
-						int spraying = currJSON.getInt("spraying"); //fuck the police
-                        mActivity.valveStates[id - 1] = spraying == 1;
+                    //We get one json object that contains success and an array of json objects
+                    //for each valve
+                    currJSON = finalObject;
+                    success = currJSON.getBoolean("success");
+                    JSONArray valveArray = currJSON.optJSONArray("items");
+                    for (int i = 0; i < valveArray.length(); i++){
+						currJSON = valveArray.getJSONObject(i);
+						id = currJSON.getInt("id");
+						boolean spraying = currJSON.getBoolean("spraying"); //fuck the police
+                        mActivity.valveStates[id - 1] = spraying;
 						
 					}
 					if (!hasControl){
@@ -401,29 +404,32 @@ public class FountainControlHandler {
 					}
 					break;
 				case SETALLVALVES:
-					currJSON = finalResult.getJSONObject(0);
+					currJSON = finalObject;
 					success = currJSON.getBoolean("success");
 					if (!success){
 						//TODO some error message
 					}
 					break;
 				case QUERYSINGLEVALVE:
-					currJSON = finalResult.getJSONObject(0);
+					currJSON = finalObject;
 					id = currJSON.getInt("id");
 					boolean spraying = currJSON.getBoolean("spraying");
 					mActivity.valveStates[id - 1] = spraying;
 					break;
 				case SETSINGLEVALVE:
-					currJSON = finalResult.getJSONObject(0);
+					currJSON = finalObject;
 					success = currJSON.getBoolean("success");
 					if (!success){
 						//TODO some error message
 					}
 					break;
 				case GETPATTERN:
+                    currJSON = finalObject;
+                    success = currJSON.getBoolean("success");
+                    JSONArray patternArray = currJSON.getJSONArray("items");
 					ArrayList<Pattern> patterns = new ArrayList<Pattern>();
-					for (int i = 0; i < finalResult.length(); i++){
-						currJSON = finalResult.getJSONObject(i);
+					for (int i = 0; i < patternArray.length(); i++){
+						currJSON = patternArray.getJSONObject(i);
 						int patternID = currJSON.getInt("id");
 						String patternName = currJSON.getString("name");
 						boolean isActive = currJSON.getBoolean("active");
@@ -437,7 +443,7 @@ public class FountainControlHandler {
 					break;
 				case SETPATTERN:
 					//TODO
-					currJSON = finalResult.getJSONObject(0);
+					currJSON = finalObject;
 					success = currJSON.getBoolean("success");
 					if (!success){
 						//TODO some error message
@@ -449,7 +455,7 @@ public class FountainControlHandler {
 				//do something with this result
 			}catch (Exception e){
                 Log.e("Result Exception", "", e);
-				Log.e("JSON", finalResult.toString());
+				Log.e("JSON", finalObject.toString());
 			}finally{
 				if (isLast){
 					//mActivity.refresh();

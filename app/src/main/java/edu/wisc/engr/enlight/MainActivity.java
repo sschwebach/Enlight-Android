@@ -112,7 +112,7 @@ public class MainActivity extends Activity {
 				//add a controller. method to refresh shit
 				PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 				if (pm.isScreenOn() && isRunning){
-                    if (controlRequested){
+                    if (controlRequested && !hasControl){
                         controller.queryPosition();
                     }
 					if (!hasControl){
