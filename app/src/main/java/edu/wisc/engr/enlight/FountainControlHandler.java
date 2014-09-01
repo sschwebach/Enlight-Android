@@ -56,7 +56,7 @@ public class FountainControlHandler {
 	FountainViewCanvas leftView;
 	FountainViewCanvas rightView;
 	ArrayList<Integer> userIDs;
-    int currID;
+    int currID = 0;
 	ArrayList<UserEntry> queue;
 
 	public FountainControlHandler(Context c){
@@ -89,7 +89,7 @@ public class FountainControlHandler {
 	public void requestControl(){
 		FountainControlTask requestControlTask = new FountainControlTask();
 		requestControlTask.addNVP(new BasicNameValuePair("apikey", "" + apiKey));
-		requestControlTask.addNVP(new BasicNameValuePair("requestedLength", "15"));
+		requestControlTask.addNVP(new BasicNameValuePair("requestedLength", "30"));
 		requestControlTask.requestControl = REQUESTCONTROL;
 		requestControlTask.isPost = true;
 		requestControlTask.execute(Utilities.requestControlURL);
@@ -111,7 +111,8 @@ public class FountainControlHandler {
         requestPositionTask.requestControl = QUERYPOSITION;
         requestPositionTask.isPost = true;
         requestPositionTask.addNVP(new BasicNameValuePair("apikey", "" + apiKey));
-        requestPositionTask.addNVP(new BasicNameValuePair("controllerID", "" + userIDs.get(0)));
+        requestPositionTask.addNVP(new BasicNameValuePair("controllerID", "" + currID));
+        requestPositionTask.execute(Utilities.queryURL);
     }
 
 	/**
@@ -121,7 +122,8 @@ public class FountainControlHandler {
 		FountainControlTask releaseControlTask = new FountainControlTask();
 		releaseControlTask.requestControl = RELEASECONTROL;
 		releaseControlTask.isPost = true;
-		releaseControlTask.addNVP(new BasicNameValuePair("apikey", "" + apiKey));
+        releaseControlTask.addNVP(new BasicNameValuePair("apikey", "" + apiKey));
+		releaseControlTask.addNVP(new BasicNameValuePair("controllerID", "" + currID));
 		releaseControlTask.execute(Utilities.releaseControlURL);
 	}
 
@@ -165,11 +167,16 @@ public class FountainControlHandler {
 	 * @param on true = on, false = off
 	 */
 	public void setSingleValve(int valveID, boolean on){
+        int spraying = 0;
+        if (on){
+            spraying = 1;
+        }
 		FountainControlTask valveTask = new FountainControlTask();
 		valveTask.requestControl = SETSINGLEVALVE;
 		valveTask.isPost = true;
 		valveTask.addNVP(new BasicNameValuePair("apikey", "" + apiKey));
-		valveTask.addNVP(new BasicNameValuePair("spraying", "" + on));
+		valveTask.addNVP(new BasicNameValuePair("spraying", "" + spraying));
+        valveTask.addNVP(new BasicNameValuePair("controllerID", "" + currID));
 		valveTask.execute(Utilities.valvesURL + "/" + valveID);
 	}
 
@@ -292,21 +299,14 @@ public class FountainControlHandler {
 					currJSON = finalObject;
                     Log.e("CURRJSON", currJSON.toString());
 					success = Boolean.parseBoolean(currJSON.getString("success"));
-					priority = currJSON.getInt("priority");
 					expires = currJSON.getInt("ttl");
 					id = currJSON.getInt("controllerID");
-					position = currJSON.getInt("queuePosition");
 					//now that we have the data, make sure we remember it
 					if (success){
+                        Log.e("REQUEST", "" + id);
+                        currID = id;
 						userIDs.add(id);
-						reqControl = true;
-						if (position == 0){
-							changeControl(true, true);
-							//got control right when we requested it
-						}else{
-							changeControl(false, true);
-							//control requested
-						}
+                        changeControl(false, true);
 					}
 					
 					break;
@@ -364,13 +364,18 @@ public class FountainControlHandler {
                     success = currJSON.getBoolean("success");
                     int trueQueuePos = currJSON.getInt("trueQueuePosition");
                     int eta = currJSON.getInt("eta");
+                    Log.e("Position", "In position " + trueQueuePos + ". ETA: " + eta);
                     if (success && trueQueuePos == 0){
                         //got control
                         changeControl(true, true);
-                    }else if (success){
-                        //still dont' have control, but has been requested
+                    }else if (success && trueQueuePos < 0){
+                        //had control but lost it
+                        changeControl(false, false);
+                    }else if (success) {
+                        //still don't have control, but has been requested
                         changeControl(false, true);
-                    }else{
+                    }
+                    else{
                         userIDs.remove(0);
                         changeControl(false, false);
                     }
@@ -381,7 +386,7 @@ public class FountainControlHandler {
 					if (!success){
 						//TODO some error message
 					}else{
-						changeControl(false, true);
+						changeControl(false, false);
 					}
 					break;
 				case QUERYALLVALVES:
@@ -392,9 +397,9 @@ public class FountainControlHandler {
                     JSONArray valveArray = currJSON.optJSONArray("items");
                     for (int i = 0; i < valveArray.length(); i++){
 						currJSON = valveArray.getJSONObject(i);
-						id = currJSON.getInt("id");
-						boolean spraying = currJSON.getBoolean("spraying"); //fuck the police
-                        mActivity.valveStates[id - 1] = spraying;
+						id = currJSON.getInt("ID");
+						int spraying = currJSON.getInt("spraying"); //fuck the police
+                        mActivity.valveStates[id - 1] = spraying == 1;
 						
 					}
 					if (!hasControl){
@@ -485,6 +490,7 @@ public class FountainControlHandler {
 			mActivity.refreshTime.setText("Request control to gain access.");
 			mActivity.controlRequested = false;
 			mActivity.sendButton.setText("Request Control");
+            mActivity.resetButton.setVisibility(View.GONE);
 		}else if (!hasControl){
 			//control has been requested, but is not acquired
 			this.reqControl = true;
@@ -496,7 +502,8 @@ public class FountainControlHandler {
 			mActivity.statusText.setText("Waiting for Control");
 			mActivity.refreshTime.setText("Another user has control. Please wait.");
 			mActivity.controlRequested = true;
-			mActivity.sendButton.setText("Please Wait");
+			mActivity.sendButton.setText("Leave Queue");
+            //mActivity.resetButton.setVisibility(View.VISIBLE);
 		}else{
 			//control is acquired
 			this.hasControl = true;
@@ -508,6 +515,8 @@ public class FountainControlHandler {
 			mActivity.statusText.setText("You Have Control");
 			mActivity.refreshTime.setText("Tap a valve to activate it or send a pattern.");
 			mActivity.sendButton.setText("Release Control");
+            mActivity.resetButton.setVisibility(View.GONE);
+
 		}
 	}
 

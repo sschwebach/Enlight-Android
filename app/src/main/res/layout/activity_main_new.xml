@@ -40,6 +40,7 @@
             android:layout_marginTop="5dp"
             android:layout_toRightOf="@id/view_pattern_center"
             android:gravity="right"
+            android:visibility="gone"
             android:textColor="@color/textcolorgold"
             android:textSize="18sp" />
     </RelativeLayout>

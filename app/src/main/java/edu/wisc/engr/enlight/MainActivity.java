@@ -42,6 +42,7 @@ public class MainActivity extends Activity {
 	public ArrayList<Pattern> patterns;
 	ImageButton refreshButton;
 	Button sendButton;
+    ImageButton resetButton;
 	ImageButton abdicateButton;
 	TextView refreshTime;
 	TextView statusText;
@@ -112,9 +113,8 @@ public class MainActivity extends Activity {
 				//add a controller. method to refresh shit
 				PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 				if (pm.isScreenOn() && isRunning){
-                    if (controlRequested && !hasControl){
-                        controller.queryPosition();
-                    }
+                    controller.queryPosition();
+
 					if (!hasControl){
 						controller.queryAllValves();
 					}
@@ -166,8 +166,17 @@ public class MainActivity extends Activity {
 		fountainCanvasLeft.addView(leftFountain);
 		fountainCanvasRight.addView(rightFountain);
 
+
 		//Add the submit button
-		Button resetButton = (Button) findViewById(R.id.refresh_button);
+		resetButton = (ImageButton) findViewById(R.id.button_give_control);
+        resetButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                controller.changeControl(false, false);
+                controller.releaseControl();
+
+            }
+        });
 		sendButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v){
@@ -191,7 +200,10 @@ public class MainActivity extends Activity {
 					Log.e("Valve", "" + sum);
 					task.setValveRequest(sum);
 					task.execute("Hello");
-				}else if (!hasControl && !controlRequested){
+				}else if (!hasControl && controlRequested){
+                    controller.releaseControl();
+                    controller.currID = 0; //the id is still in the queue until it "has control"
+                }else if (!hasControl && !controlRequested){
 					controller.requestControl();
 				}
 
