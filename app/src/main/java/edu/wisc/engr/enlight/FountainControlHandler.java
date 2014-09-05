@@ -26,6 +26,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
+
 /**
  * This class controls the fountain control. Queries the server to see if the 
  * user can gain control and requests control from the server.
@@ -230,7 +232,9 @@ public class FountainControlHandler {
 		}
 		@Override
 		protected void onPreExecute(){
-			mActivity.reloadProgress.setVisibility(View.VISIBLE);
+            if (requestControl !=  QUERYALLVALVES && requestControl != QUERYPOSITION){
+                mActivity.reloadProgress.setVisibility(View.VISIBLE);
+            }
 		}
 
 		@Override
@@ -303,11 +307,16 @@ public class FountainControlHandler {
 					id = currJSON.getInt("controllerID");
 					//now that we have the data, make sure we remember it
 					if (success){
+                        Toast toast = Toast.makeText(mContext, "Successfully Requested Control", Toast.LENGTH_SHORT);
+                        toast.show();
                         Log.e("REQUEST", "" + id);
                         currID = id;
 						userIDs.add(id);
                         changeControl(false, true);
-					}
+					}else{
+                        Toast toast = Toast.makeText(mContext, "Control Request Unsuccessful", Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
 					
 					break;
 				case QUERYCONTROL:
@@ -464,7 +473,9 @@ public class FountainControlHandler {
 			}finally{
 				if (isLast){
 					//mActivity.refresh();
-					mActivity.reloadProgress.setVisibility(View.INVISIBLE);
+                    if (requestControl != QUERYALLVALVES && requestControl != QUERYPOSITION) {
+                        mActivity.reloadProgress.setVisibility(View.INVISIBLE);
+                    }
 					mActivity.pDialog.hide();
 				}
 			}

@@ -61,13 +61,6 @@ public class MainActivity extends Activity {
 		patterns = new ArrayList<Pattern>();
 		leftFountain = new FountainViewCanvas(this, true);
 		rightFountain = new FountainViewCanvas(this, false);
-		refreshTimer = new Timer();
-		refreshTimer.schedule(new TimerTask() {
-			@Override
-			public void run(){
-				TimerMethod();
-			}
-		}, 0, REFRESHTIME);
 		doSetup();
 	}
 
@@ -113,7 +106,9 @@ public class MainActivity extends Activity {
 				//add a controller. method to refresh shit
 				PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 				if (pm.isScreenOn() && isRunning){
-                    controller.queryPosition();
+                    if (controlRequested || hasControl || controller.currID != 0) {
+                        controller.queryPosition();
+                    }
 
 					if (!hasControl){
 						controller.queryAllValves();

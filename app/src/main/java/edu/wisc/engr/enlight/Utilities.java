@@ -2,8 +2,10 @@ package edu.wisc.engr.enlight;
 
 public class Utilities {
     //URL is only used for the unused class ContactFountainTask
-    static final public String baseURL = "http://enlight.club:8082/api";
-    static final public String URL = "http://enlight.club:8082/api";
+    //static final public String baseURL = "http://enlight.club:8082/api";
+    //static final public String URL = "http://enlight.club:8082/api";
+    static final public String URL = "http://enlight.engr.wisc.edu/api";
+    static final public String baseURL = "http://enlight.engr.wisc.edu/api";
 	//static final public String URL = "http://enlight.engr.wisc.edu/enlight-backend/php/act.php";
 	//static final public String baseURL = "http://enlight.engr.wisc.edu/enlight-backend/api";
     //static final public String baseURL = "http://alexkersten.com/enlight/api";
