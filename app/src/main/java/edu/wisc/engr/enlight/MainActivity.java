@@ -84,20 +84,14 @@ public class MainActivity extends Activity {
 			}
 		}, 0, REFRESHTIME);
 	}
-	
-	@Override
-	protected void onStop(){
-		super.onStop();
-		isRunning = false;
-		this.refreshTimer.cancel();
-	}
-	
-	@Override
-	protected void onDestroy(){
-		super.onDestroy();
-		isRunning = false;
-		this.refreshTimer.cancel();
-	}
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        isRunning = false;
+        this.refreshTimer.cancel();
+    }
+
 
 	private void TimerMethod(){
 		this.runOnUiThread(new Runnable(){

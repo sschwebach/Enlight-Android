@@ -403,7 +403,7 @@ public class FountainControlHandler {
                     //for each valve
                     currJSON = finalObject;
                     success = currJSON.getBoolean("success");
-                    JSONArray valveArray = currJSON.optJSONArray("items");
+                    JSONArray valveArray = currJSON.getJSONArray("items");
                     for (int i = 0; i < valveArray.length(); i++){
 						currJSON = valveArray.getJSONObject(i);
 						id = currJSON.getInt("ID");
