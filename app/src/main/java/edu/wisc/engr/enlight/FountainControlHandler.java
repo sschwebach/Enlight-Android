@@ -234,6 +234,9 @@ public class FountainControlHandler {
 		protected void onPreExecute(){
             if (requestControl !=  QUERYALLVALVES && requestControl != QUERYPOSITION){
                 mActivity.reloadProgress.setVisibility(View.VISIBLE);
+                if (requestControl != SETALLVALVES && requestControl != SETSINGLEVALVE) {
+                    mActivity.sendButton.setVisibility(View.INVISIBLE);
+                }
             }
 		}
 
@@ -395,6 +398,8 @@ public class FountainControlHandler {
 					if (!success){
 						//TODO some error message
 					}else{
+                        Toast toast = Toast.makeText(mContext, "Control Release Successful", Toast.LENGTH_SHORT);
+                        toast.show();
 						changeControl(false, false);
 					}
 					break;
@@ -478,6 +483,9 @@ public class FountainControlHandler {
                     }
 					mActivity.pDialog.hide();
 				}
+                if (requestControl == QUERYPOSITION) {
+                    mActivity.sendButton.setVisibility(View.VISIBLE);
+                }
 			}
 		}
 	}
@@ -529,6 +537,7 @@ public class FountainControlHandler {
             mActivity.resetButton.setVisibility(View.GONE);
 
 		}
+        mActivity.sendButton.setVisibility(View.VISIBLE);
 	}
 
 }
