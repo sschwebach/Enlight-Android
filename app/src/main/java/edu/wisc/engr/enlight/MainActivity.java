@@ -36,7 +36,6 @@ public class MainActivity extends Activity {
     private final int REFRESHTIME = 1000;
 	ProgressDialog pDialog;
 	Time lastRefresh;
-	int bitmask;
 	int userID;
 	public UserQueue userQueue;
 	public ArrayList<Pattern> patterns;
