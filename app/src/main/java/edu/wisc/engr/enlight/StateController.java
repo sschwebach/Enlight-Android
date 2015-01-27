@@ -12,16 +12,16 @@ public class StateController {
     public static final int IN_QUEUE = 1;
     public static final int HAS_CONTROL = 2;
 
-    public static int state = NO_REQUESTS;
-    public static boolean controlRequested = false;
-    public static boolean hasControl = false;
+    public int state = NO_REQUESTS;
+    public boolean controlRequested = false;
+    public boolean hasControl = false;
     //a pending request (NO_STATE) means there is no pending request
-    public static int pending = NO_STATE;
+    public int pending = NO_STATE;
     //a boolean to wait for the UI to update
-    public static boolean wait = false;
+    public boolean wait = false;
     //a boolean to indicate a web call is going on
-    public static boolean busy = false;
-    private static MainActivity mActivity;
+    public boolean busy = false;
+    private MainActivity mActivity;
     //TODO add support for pending requests that couldn't be serviced due to a web call
 
     /*
@@ -48,7 +48,7 @@ public class StateController {
      * Binds the state controller to the activity (wow my code has a horrible layout)
      * @param a
      */
-    public static void bind(MainActivity a){
+    public void bind(MainActivity a){
         mActivity = a;
     }
 
@@ -56,7 +56,7 @@ public class StateController {
      * Checks if the state should be changed.
      * @return Returns the new state of the program.
      */
-    public static int tick(){
+    public int tick(){
         int oldState = state;
         if (!wait) {
             switch (oldState) {
@@ -113,21 +113,21 @@ public class StateController {
     /**
      * Pause the state machine (this will also help with transactions)
      */
-    public static void pause(){
+    public void pause(){
         wait = true;
     }
 
     /**
      * Resume the state machine (or to signal that a transaction is complete)
      */
-    public static void resume(){
+    public void resume(){
         wait = false;
     }
 
     /**
      * Resets the state machine to NO_REQUESTS
      */
-    public static void reset(){
+    public void reset(){
         wait = false;
         state = NO_REQUESTS;
     }
