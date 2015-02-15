@@ -37,7 +37,8 @@ import android.widget.Toast;
 public class FountainControlHandler {
 	private Context mContext;
 	private ProgressDialog mDialog;
-	private MainActivity mActivity;
+	private Fountain mFountain;
+    private MainActivity mActivity;
 	private String apiKey = "abc123";
 	public boolean hasControl = false;
 	public boolean reqControl = false;
@@ -68,6 +69,9 @@ public class FountainControlHandler {
 		userIDs = new ArrayList<Integer>();
 		queue = new ArrayList<UserEntry>();
 	}
+    public FountainControlHandler(Fountain f){
+        this.mFountain = f;
+    }
 
 	//TODO
 	//The following code is awfully repetitive...
@@ -255,6 +259,9 @@ public class FountainControlHandler {
                     return reader.readLine();
 				}catch (Exception e){
 					Log.e("Exception", e.toString());
+                    if (mFountain != null){
+                        mFountain.badRequest();
+                    }
 				}
 			}else {
 				//query task
@@ -266,6 +273,9 @@ public class FountainControlHandler {
                     return reader.readLine();
 				} catch (Exception e) {
 					Log.e("BackgroundTaskException", e.toString());
+                    if (mFountain != null){
+                        mFountain.badRequest();
+                    }
 				}
 			}
 			return null;
@@ -281,15 +291,22 @@ public class FountainControlHandler {
 
 			if (response == null){
 				//bad request, check internet connection
-				mActivity.pDialog.hide();
-				mActivity.reloadProgress.setVisibility(View.INVISIBLE);
+                if (mActivity != null) {
+                    mActivity.pDialog.hide();
+                    mActivity.reloadProgress.setVisibility(View.INVISIBLE);
+                }
+                if (mFountain != null){
+                    mFountain.badRequest();
+                }
 				return;
 			}
             JSONObject finalObject = new JSONObject();
             try{
                 finalObject = new JSONObject(response);
             }catch (JSONException e){
-
+                if (mFountain != null){
+                    mFountain.badRequest();
+                }
             }
 			try{
 				JSONObject currJSON;
@@ -310,16 +327,13 @@ public class FountainControlHandler {
 					id = currJSON.getInt("controllerID");
 					//now that we have the data, make sure we remember it
 					if (success){
-                        Toast toast = Toast.makeText(mContext, "Successfully Requested Control", Toast.LENGTH_SHORT);
-                        toast.show();
+                        //Toast toast = Toast.makeText(mContext, "Successfully Requested Control", Toast.LENGTH_SHORT);
+                        //toast.show();
                         Log.e("REQUEST", "" + id);
                         currID = id;
 						userIDs.add(id);
                         changeControl(false, true);
-					}else{
-                        Toast toast = Toast.makeText(mContext, "Control Request Unsuccessful", Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
+					}
 					
 					break;
 				case QUERYCONTROL:
@@ -397,9 +411,10 @@ public class FountainControlHandler {
 					success = currJSON.getBoolean("success");
 					if (!success){
 						//TODO some error message
+                        if (mFountain != null){
+                            mFountain.badRequest();
+                        }
 					}else{
-                        Toast toast = Toast.makeText(mContext, "Control Release Successful", Toast.LENGTH_SHORT);
-                        toast.show();
 						changeControl(false, false);
 					}
 					break;
@@ -409,17 +424,26 @@ public class FountainControlHandler {
                     currJSON = finalObject;
                     success = currJSON.getBoolean("success");
                     JSONArray valveArray = currJSON.getJSONArray("items");
+                    boolean[] states = new boolean[24];
                     for (int i = 0; i < valveArray.length(); i++){
 						currJSON = valveArray.getJSONObject(i);
 						id = currJSON.getInt("ID");
 						int spraying = currJSON.getInt("spraying"); //fuck the police
-                        mActivity.valveStates[id - 1] = spraying == 1;
+                        if (mActivity != null) {
+                            mActivity.valveStates[id - 1] = spraying == 1;
+                        }
+                        states[id - 1] = spraying == 1;
 						
 					}
+                    if (mFountain != null){
+                        mFountain.valvesChanged(states);
+                    }
 					if (!hasControl){
 						//refresh the canvas views if the user doesn't have control
-						mActivity.leftFountain.setValves(mActivity.valveStates);
-						mActivity.rightFountain.setValves(mActivity.valveStates);
+                        if (mActivity != null) {
+                            mActivity.leftFountain.setValves(mActivity.valveStates);
+                            mActivity.rightFountain.setValves(mActivity.valveStates);
+                        }
 					}
 					break;
 				case SETALLVALVES:
@@ -427,19 +451,30 @@ public class FountainControlHandler {
 					success = currJSON.getBoolean("success");
 					if (!success){
 						//TODO some error message
+                        if (mFountain != null){
+                            mFountain.badRequest();
+                        }
 					}
 					break;
 				case QUERYSINGLEVALVE:
 					currJSON = finalObject;
 					id = currJSON.getInt("id");
 					boolean spraying = currJSON.getBoolean("spraying");
-					mActivity.valveStates[id - 1] = spraying;
+                    if (mActivity != null) {
+                        mActivity.valveStates[id - 1] = spraying;
+                    }
+                    if (mFountain != null) {
+                        mFountain.setSingleValve(id - 1, spraying);
+                    }
 					break;
 				case SETSINGLEVALVE:
 					currJSON = finalObject;
 					success = currJSON.getBoolean("success");
 					if (!success){
 						//TODO some error message
+                        if (mFountain != null){
+                            mFountain.badRequest();
+                        }
 					}
 					break;
 				case GETPATTERN:
@@ -455,8 +490,10 @@ public class FountainControlHandler {
 						//TODO define a pattern object and make one here
 						patterns.add(new Pattern(patternID, patternName, isActive));
 					}
-					mActivity.patterns = patterns;
-					mActivity.refresh();
+                    if (mActivity != null) {
+                        mActivity.patterns = patterns;
+                        mActivity.refresh();
+                    }
 					//TODO now that we have all these patterns do something
 					//with it (most likely in the activity)
 					break;
@@ -466,6 +503,9 @@ public class FountainControlHandler {
 					success = currJSON.getBoolean("success");
 					if (!success){
 						//TODO some error message
+                        if (mFountain != null){
+                            mFountain.badRequest();
+                        }
 					}
 					break;
 				default:
@@ -475,15 +515,23 @@ public class FountainControlHandler {
 			}catch (Exception e){
                 Log.e("Result Exception", "", e);
 				Log.e("JSON", finalObject.toString());
+                if (mFountain != null){
+                    mFountain.badRequest();
+                }
 			}finally{
 				if (isLast){
 					//mActivity.refresh();
-                    if (requestControl != QUERYALLVALVES && requestControl != QUERYPOSITION) {
+                    if (requestControl != QUERYALLVALVES && requestControl != QUERYPOSITION && mActivity != null) {
                         mActivity.reloadProgress.setVisibility(View.INVISIBLE);
                     }
-					mActivity.pDialog.hide();
+                    if (mActivity != null) {
+                        mActivity.pDialog.hide();
+                    }
+                    if (mFountain != null){
+                        mFountain.lastOpFinished();
+                    }
 				}
-                if (requestControl == QUERYPOSITION) {
+                if (requestControl == QUERYPOSITION && mActivity != null) {
                     mActivity.sendButton.setVisibility(View.VISIBLE);
                 }
 			}
@@ -497,47 +545,57 @@ public class FountainControlHandler {
 	 * have it
 	 */
 	public void changeControl(boolean hasControl, boolean reqControl){
+        if (mFountain != null){
+            mFountain.controlChanged(hasControl, reqControl);
+        }
 		if (!hasControl && !reqControl){
 			//control isn't even requested
 			this.reqControl = false;
 			this.hasControl = false;
-			mActivity.patternSpinner.setVisibility(View.GONE);
-			mActivity.hasControl = false;
-			mActivity.rightFountain.hasControl = false;
-			mActivity.leftFountain.hasControl = false;
-			mActivity.statusText.setText("Fountain Status");
-			mActivity.refreshTime.setText("Request control to gain access.");
-			mActivity.controlRequested = false;
-			mActivity.sendButton.setText("Request Control");
-            mActivity.resetButton.setVisibility(View.GONE);
+            if (mActivity != null) {
+                mActivity.patternSpinner.setVisibility(View.GONE);
+                mActivity.hasControl = false;
+                mActivity.rightFountain.hasControl = false;
+                mActivity.leftFountain.hasControl = false;
+                mActivity.statusText.setText("Fountain Status");
+                mActivity.refreshTime.setText("Request control to gain access.");
+                mActivity.controlRequested = false;
+                mActivity.sendButton.setText("Request Control");
+                mActivity.resetButton.setVisibility(View.GONE);
+            }
 		}else if (!hasControl){
 			//control has been requested, but is not acquired
 			this.reqControl = true;
 			this.hasControl = false;
-			mActivity.patternSpinner.setVisibility(View.GONE);
-			mActivity.hasControl = false;
-			mActivity.rightFountain.hasControl = false;
-			mActivity.leftFountain.hasControl = false;
-			mActivity.statusText.setText("Waiting for Control");
-			mActivity.refreshTime.setText("Another user has control. Please wait.");
-			mActivity.controlRequested = true;
-			mActivity.sendButton.setText("Leave Queue");
+            if (mActivity != null) {
+                mActivity.patternSpinner.setVisibility(View.GONE);
+                mActivity.hasControl = false;
+                mActivity.rightFountain.hasControl = false;
+                mActivity.leftFountain.hasControl = false;
+                mActivity.statusText.setText("Waiting for Control");
+                mActivity.refreshTime.setText("Another user has control. Please wait.");
+                mActivity.controlRequested = true;
+                mActivity.sendButton.setText("Leave Queue");
+            }
             //mActivity.resetButton.setVisibility(View.VISIBLE);
 		}else{
 			//control is acquired
 			this.hasControl = true;
 			this.reqControl = reqControl;
-			mActivity.patternSpinner.setVisibility(View.VISIBLE);
-			mActivity.hasControl = true;
-			mActivity.rightFountain.hasControl = true;
-			mActivity.leftFountain.hasControl = true;
-			mActivity.statusText.setText("You Have Control");
-			mActivity.refreshTime.setText("Tap a valve to activate it or send a pattern.");
-			mActivity.sendButton.setText("Release Control");
-            mActivity.resetButton.setVisibility(View.GONE);
-
+            if (mActivity != null) {
+                mActivity.patternSpinner.setVisibility(View.VISIBLE);
+                mActivity.hasControl = true;
+                mActivity.rightFountain.hasControl = true;
+                mActivity.leftFountain.hasControl = true;
+                mActivity.statusText.setText("You Have Control");
+                mActivity.refreshTime.setText("Tap a valve to activate it or send a pattern.");
+                mActivity.sendButton.setText("Release Control");
+                mActivity.resetButton.setVisibility(View.GONE);
+            }
 		}
-        mActivity.sendButton.setVisibility(View.VISIBLE);
+        if (mActivity != null) {
+            mActivity.sendButton.setVisibility(View.VISIBLE);
+        }
 	}
 
 }

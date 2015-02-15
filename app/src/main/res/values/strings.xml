@@ -18,5 +18,6 @@
     <string name="title_activity_main_activity_wear">MainActivityWear</string>
     <string name="hello_round">Hello Round World!</string>
     <string name="hello_square">Hello Square World!</string>
+    <string name="title_activity_controller">ControllerActivity</string>
 
 </resources>

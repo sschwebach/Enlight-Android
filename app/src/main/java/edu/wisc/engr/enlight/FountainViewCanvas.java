@@ -33,6 +33,7 @@ public class FountainViewCanvas extends View{
 	RectF rectInner;
 	FountainControlHandler controller;
 	public boolean[] buttonPressed;
+    private FountainView fView;
 
 	public FountainViewCanvas(Context context, boolean left){
 		super(context);
@@ -51,11 +52,26 @@ public class FountainViewCanvas extends View{
 		paintWhite.setStyle(Paint.Style.FILL);
 		buttonPressed = new boolean[12];
 
-
-
-
-
 	}
+
+    public FountainViewCanvas(Context context, boolean left, FountainView fView){
+        super(context);
+        this.left = left;
+        paintLine.setAntiAlias(true);
+        paintLine.setColor(Color.BLACK);
+        paintLine.setStyle(Paint.Style.STROKE);
+        paintLine.setStrokeWidth(4.5f);
+        paintFill.setAntiAlias(true);
+        paintFill.setColor(badgerRed);
+        this.context = context;
+        paintFill.setStyle(Paint.Style.FILL);
+        //TODO set the color to the same one as the xml layout
+        paintWhite.setAntiAlias(true);
+        paintWhite.setColor(Color.WHITE);
+        paintWhite.setStyle(Paint.Style.FILL);
+        buttonPressed = new boolean[12];
+        this.fView = fView;
+    }
 
 	@Override
 	public void onDraw(Canvas canvas){
@@ -224,9 +240,6 @@ public class FountainViewCanvas extends View{
 	public boolean onTouchEvent(MotionEvent e){
 		if ((e.getAction() & MotionEvent.ACTION_DOWN) == MotionEvent.ACTION_DOWN){
 			if (hasControl){
-				if (controller == null){
-					controller = ((MainActivity) context).controller;
-				}
                 //Get the location of  the
 				float xLoc = e.getX();
 				float yLoc = e.getY();
@@ -236,9 +249,9 @@ public class FountainViewCanvas extends View{
 					this.invalidate();
 					//send the server request
 					if (left){
-						controller.setSingleValve(13 - buttonNum, buttonPressed[buttonNum - 1]);
+                        fView.onValvePressed(13 - buttonNum, buttonPressed[buttonNum - 1]);
 					}else{
-						controller.setSingleValve(25 - buttonNum, buttonPressed[buttonNum - 1]);
+                        fView.onValvePressed(25 - buttonNum, buttonPressed[buttonNum - 1]);
 					}
 				}
 			}
@@ -261,5 +274,13 @@ public class FountainViewCanvas extends View{
 		}
 		this.invalidate();
 	}
+
+    public void lock(){
+        this.hasControl = false;
+    }
+
+    public void unlock(){
+        this.hasControl = true;
+    }
 
 }

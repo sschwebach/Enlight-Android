@@ -6,22 +6,20 @@ import android.app.Activity;
  * Created by SAM-DESK on 1/24/2015.
  */
 public class StateController {
-
-    public static final int NO_STATE = -1;
-    public static final int NO_REQUESTS = 0;
-    public static final int IN_QUEUE = 1;
-    public static final int HAS_CONTROL = 2;
+    // I can't use Android studio's refactoring tool well, so we're doing this for now (the laze is real)
+    public static final int NO_STATE = Utilities.NO_STATE;
+    public static final int NO_REQUESTS = Utilities.NO_REQUESTS;
+    public static final int IN_QUEUE = Utilities.IN_QUEUE;
+    public static final int HAS_CONTROL = Utilities.HAS_CONTROL;
 
     public int state = NO_REQUESTS;
-    public boolean controlRequested = false;
-    public boolean hasControl = false;
     //a pending request (NO_STATE) means there is no pending request
     public int pending = NO_STATE;
     //a boolean to wait for the UI to update
     public boolean wait = false;
     //a boolean to indicate a web call is going on
     public boolean busy = false;
-    private MainActivity mActivity;
+    private Fountain mFountain;
     //TODO add support for pending requests that couldn't be serviced due to a web call
 
     /*
@@ -44,20 +42,18 @@ public class StateController {
     Some sort of tick function will be defined here to actually change the state
      */
 
-    /**
-     * Binds the state controller to the activity (wow my code has a horrible layout)
-     * @param a
-     */
-    public void bind(MainActivity a){
-        mActivity = a;
+    public StateController(Fountain f){
+        this.mFountain = f;
     }
+
 
     /**
      * Checks if the state should be changed.
      * @return Returns the new state of the program.
      */
-    public int tick(){
+    public boolean tick(boolean reqControl, boolean hasControl){
         int oldState = state;
+        // If we need to pause the state controller for some reason
         if (!wait) {
             switch (oldState) {
                 //currently each case is the same, but I'll code them all out in case that changes
@@ -65,7 +61,7 @@ public class StateController {
                     //see if we should change to one of the other states
                     if (hasControl) {
                         state = HAS_CONTROL;
-                    } else if (controlRequested && !hasControl) {
+                    } else if (reqControl && !hasControl) {
                         state = IN_QUEUE;
                     } else {
                         state = NO_REQUESTS;
@@ -74,7 +70,7 @@ public class StateController {
                 case IN_QUEUE:
                     if (hasControl) {
                         state = HAS_CONTROL;
-                    } else if (controlRequested && !hasControl) {
+                    } else if (reqControl && !hasControl) {
                         state = IN_QUEUE;
                     } else {
                         state = NO_REQUESTS;
@@ -83,7 +79,7 @@ public class StateController {
                 case HAS_CONTROL:
                     if (hasControl) {
                         state = HAS_CONTROL;
-                    } else if (controlRequested && !hasControl) {
+                    } else if (reqControl && !hasControl) {
                         //not sure how this can happen in the app's current state
                         state = IN_QUEUE;
                     } else {
@@ -93,20 +89,19 @@ public class StateController {
                 default:
                     //error state? return to the base state until things change
                     state = NO_REQUESTS;
-                    controlRequested = false;
+                    reqControl = false;
                     hasControl = false;
                     break;
             }
-            //now that we've updated the state, alert the UI that it's been updated
-            //TODO update the UI here
             //first see if the state even changes
             if (state != oldState){
                 //if the state has changed, actually do something
+                return true;
             }
             //even if the state hasn't changed, we want to put the button back I suppose
 
         }
-        return state;
+        return false;
     }
 
 
@@ -130,5 +125,13 @@ public class StateController {
     public void reset(){
         wait = false;
         state = NO_REQUESTS;
+    }
+
+    /**
+     * Get the current state of the fountain.
+     * @return Returns the state according to the values in Utilities
+     */
+    public int getState(){
+        return this.state;
     }
 }
