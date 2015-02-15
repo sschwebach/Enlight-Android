@@ -61,19 +61,12 @@ public class ControllerActivity extends FountainActivity {
     public void doSetup() {
         setContentView(R.layout.activity_controller);
         // Instantiate our fountain view
-        mView = new FountainView(this, this);
-        leftView = new FountainViewCanvas(this, true, mView);
-        rightView = new FountainViewCanvas(this, false, mView);
-        mView.setViews(leftView, rightView);
+        addCanvas();
         statusText = (TextView) findViewById(R.id.text_control);
         refreshTime = (TextView) findViewById(R.id.text_refresh);
         sendButton = (Button) findViewById(R.id.button_send);
         patternSpinner = (Spinner) findViewById(R.id.spinner_pattern);
         reloadProgress = (ProgressBar) findViewById(R.id.progress_reload);
-        LinearLayout fountainCanvasLeft = (LinearLayout) findViewById(R.id.layout_canvas_left);
-        LinearLayout fountainCanvasRight = (LinearLayout) findViewById(R.id.layout_canvas_right);
-        fountainCanvasLeft.addView(leftView);
-        fountainCanvasRight.addView(rightView);
         //mView.unlock();
 
 
@@ -89,6 +82,7 @@ public class ControllerActivity extends FountainActivity {
                 }
             }
         });
+
     }
 
     /**
@@ -172,5 +166,19 @@ public class ControllerActivity extends FountainActivity {
     public void onLastLoad() {
         sendButton.setVisibility(View.VISIBLE);
         reloadProgress.setVisibility(View.GONE);
+    }
+
+    /**
+     * Magic voodoo code to make our fountain view less crappy to work with. Don't change the order of this please
+     */
+    private void addCanvas(){
+        mView = new FountainView(this, this);
+        leftView = new FountainViewCanvas(this, true, mView);
+        rightView = new FountainViewCanvas(this, false, mView);
+        mView.setViews(leftView, rightView);
+        LinearLayout fountainCanvasLeft = (LinearLayout) findViewById(R.id.layout_canvas_left);
+        LinearLayout fountainCanvasRight = (LinearLayout) findViewById(R.id.layout_canvas_right);
+        fountainCanvasLeft.addView(leftView);
+        fountainCanvasRight.addView(rightView);
     }
 }
