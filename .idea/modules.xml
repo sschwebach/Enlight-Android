@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Enlight-Android.iml" filepath="$PROJECT_DIR$/Enlight-Android.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/enlight-wear/enlight-wear.iml" filepath="$PROJECT_DIR$/enlight-wear/enlight-wear.iml" />
     </modules>
   </component>
 </project>
