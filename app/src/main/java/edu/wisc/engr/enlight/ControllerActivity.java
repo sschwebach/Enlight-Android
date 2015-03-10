@@ -55,7 +55,8 @@ public class ControllerActivity extends FountainActivity {
     }
 
     /**
-     * This method is called to setup everything unique to the activity
+     * This method is called to setup everything unique to the activity. Set up your buttons and
+     * other widgets here
      */
     @Override
     public void doSetup() {
