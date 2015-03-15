@@ -1,16 +1,21 @@
 package edu.wisc.engr.enlight;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.text.Layout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -26,6 +31,7 @@ public class ControllerActivity extends FountainActivity {
     FountainView mView;
     FountainViewCanvas leftView;
     FountainViewCanvas rightView;
+    CircularTimer timerView;
 
 
     @Override
@@ -60,6 +66,7 @@ public class ControllerActivity extends FountainActivity {
      */
     @Override
     public void doSetup() {
+        Log.e("Setup", "Setup");
         setContentView(R.layout.activity_controller);
         // Instantiate our fountain view
         addCanvas();
@@ -68,6 +75,17 @@ public class ControllerActivity extends FountainActivity {
         sendButton = (Button) findViewById(R.id.button_send);
         patternSpinner = (Spinner) findViewById(R.id.spinner_pattern);
         reloadProgress = (ProgressBar) findViewById(R.id.progress_reload);
+        timerView = new CircularTimer(this);
+
+        // Fake empty container layout
+        RelativeLayout lContainerLayout = (RelativeLayout) findViewById(R.id.layout_timerWrap);
+        RelativeLayout.LayoutParams timerParams = new RelativeLayout.LayoutParams(500, 500);
+        timerParams.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+        timerParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+        lContainerLayout.addView(timerView, timerParams);
+        timerView.setTimeS(5);
+        timerView.setRadius(200);
+        timerView.start();
         //mView.unlock();
 
 

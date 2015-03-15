@@ -2,14 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF" >
+    android:background="#FFFFFF">
 
     <RelativeLayout
         android:id="@+id/layout_pattern"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_alignParentTop="true"
-        android:background="@drawable/background_pattern" >
+        android:background="@drawable/background_pattern">
 
         <TextView
             android:id="@+id/text_overview"
@@ -40,10 +40,11 @@
             android:layout_marginTop="5dp"
             android:layout_toRightOf="@id/view_pattern_center"
             android:gravity="right"
-            android:visibility="gone"
             android:textColor="@color/textcolorgold"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:visibility="gone" />
     </RelativeLayout>
+
 
     <LinearLayout
         android:id="@+id/layout_canvas_parent"
@@ -51,7 +52,7 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/layout_control"
         android:layout_below="@id/layout_pattern"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <LinearLayout
             android:id="@+id/layout_canvas_left"
@@ -74,7 +75,7 @@
         android:layout_height="55dp"
         android:layout_above="@+id/layout_bottom_bar"
         android:background="#FFFFFF"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/text_control"
@@ -103,17 +104,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@color/titlebackgroundcolor" >
-        
+        android:background="@color/titlebackgroundcolor">
+
         <ProgressBar
             android:id="@+id/progress_reload"
-            android:layout_height="45dp"
             android:layout_width="45dp"
+            android:layout_height="45dp"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:visibility="invisible"
-            android:layout_margin="7dp" />
-            
+            android:layout_margin="7dp"
+            android:visibility="invisible" />
+
 
         <ImageButton
             android:id="@+id/button_refresh"
@@ -123,9 +124,9 @@
             android:layout_margin="7dp"
             android:background="@drawable/roundbutton"
             android:padding="6dp"
-            android:visibility="gone"
             android:scaleType="fitCenter"
-            android:src="@drawable/icon_refresh" />
+            android:src="@drawable/icon_refresh"
+            android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/button_give_control"
@@ -135,9 +136,9 @@
             android:layout_margin="7dp"
             android:background="@drawable/roundbutton"
             android:padding="10dp"
-            android:visibility="gone"
             android:scaleType="fitCenter"
-            android:src="@drawable/icon_x" />
+            android:src="@drawable/icon_x"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/button_send"
