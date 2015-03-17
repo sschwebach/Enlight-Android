@@ -237,9 +237,9 @@ public class FountainControlHandler {
 		@Override
 		protected void onPreExecute(){
             if (requestControl !=  QUERYALLVALVES && requestControl != QUERYPOSITION){
-                mActivity.reloadProgress.setVisibility(View.VISIBLE);
+                //mActivity.reloadProgress.setVisibility(View.VISIBLE);
                 if (requestControl != SETALLVALVES && requestControl != SETSINGLEVALVE) {
-                    mActivity.sendButton.setVisibility(View.INVISIBLE);
+                    //mActivity.sendButton.setVisibility(View.INVISIBLE);
                 }
             }
 		}

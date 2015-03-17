@@ -7,6 +7,9 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -14,7 +17,7 @@ import java.util.TimerTask;
 /**
  * Created by SAM-DESK on 3/15/2015.
  */
-public class CircularTimer extends View{
+public class CircularTimer extends View {
     private Context mContext;
     private float radius = 30.f; //defaults to 30 pixels
     private int fillColor = 0xFFFF0000; //defaults to red
@@ -32,6 +35,8 @@ public class CircularTimer extends View{
     private Paint paintBorder;
     private Paint paintFill;
     private Timer frameTimer;
+    private TextView timeText;
+    private RelativeLayout textLayout;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -53,11 +58,21 @@ public class CircularTimer extends View{
         paintBorder.setColor(borderColor);
 
         this.frameTimer = new Timer();
+        this.timeText = new TextView(context);
+        this.timeText.setVisibility(View.VISIBLE);
+        this.timeText.setTextColor(0xFF000000);
+        this.timeText.setTextSize(30.f);
+        this.timeText.setText("Hello world!");
 
+
+        textLayout = new RelativeLayout(context);
+
+
+        textLayout.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void onDraw(Canvas canvas){
+    public void onDraw(Canvas canvas) {
         height = getHeight();
         width = getWidth();
         centerX = width / 2.f;
@@ -65,60 +80,75 @@ public class CircularTimer extends View{
         RectF fill = new RectF();
         fill.set(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
         canvas.drawArc(fill, -90.f + (1.f - percentRemaining) * 360.f, 360.f * percentRemaining, true, paintFill);
+
+
+        textLayout.measure(canvas.getWidth(), canvas.getHeight());
+        textLayout.layout(0, 0, canvas.getWidth(), canvas.getHeight());
+
+        if (timeText.getParent() == null) {
+            textLayout.addView(timeText);
+        }
+        RelativeLayout.LayoutParams textParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        textParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        this.timeText.setLayoutParams(textParams);
+        textLayout.draw(canvas);
+
     }
 
-    private void timerMethod(){
-        ((Activity ) mContext).runOnUiThread(new Runnable() {
+    private void timerMethod() {
+        ((Activity) mContext).runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 remainingMS = remainingMS - 1000 / 60;
                 percentRemaining = (float) remainingMS / maxTimeMS;
-                if (percentRemaining <= 0.f){
+                if (percentRemaining <= 0.f) {
                     percentRemaining = 1.f;
                     remainingMS = maxTimeMS;
                 }
+                timeText.setText("" + (int) remainingMS / 1000);
                 invalidate();
             }
         });
     }
 
-    public void setRadius(float px){
+    public void setRadius(float px) {
         this.radius = px;
     }
 
-    public void setRadiusDP(int dp){
+    public void setRadiusDP(int dp) {
         setRadius(Utilities.convertDpToPixel(dp, mContext));
     }
 
-    public void setFillColor(int color){
+    public void setFillColor(int color) {
         this.fillColor = color;
         paintFill.setColor(color);
     }
 
-    public void setBorderColor(int color){
+    public void setBorderColor(int color) {
         this.borderColor = color;
         paintBorder.setColor(color);
     }
 
-    public void showBorder(boolean show){
+    public void showBorder(boolean show) {
         this.showBorder = show;
     }
 
-    public void showText(boolean show){
+    public void showText(boolean show) {
         this.showText = show;
     }
 
-    public void setTimeMS(int milliseconds){
+    public void setTimeMS(int milliseconds) {
         this.maxTimeMS = milliseconds;
         this.remainingMS = this.maxTimeMS;
+        this.timeText.setText("" + (int) this.remainingMS / 1000);
     }
 
-    public void setTimeS(int seconds){
+    public void setTimeS(int seconds) {
         setTimeMS(seconds * 1000);
     }
 
-    public void start(){
-        if (frameTimer == null){
+    public void start() {
+        if (frameTimer == null) {
             frameTimer = new Timer();
         }
         this.frameTimer.schedule(new TimerTask() {
@@ -129,18 +159,18 @@ public class CircularTimer extends View{
         }, 0, 1000 / 60);
     }
 
-    public void reset(){
+    public void reset() {
         this.remainingMS = this.maxTimeMS;
         this.percentRemaining = 1.f;
     }
 
-    public void pause(){
+    public void pause() {
         this.frameTimer.cancel();
         this.frameTimer = null;
     }
 
-    public void resume(){
-        if (this.frameTimer == null){
+    public void resume() {
+        if (this.frameTimer == null) {
             //recreate the timer
             this.frameTimer = new Timer();
             this.frameTimer.schedule(new TimerTask() {
