@@ -59,24 +59,89 @@ public class ControllerActivityWear extends Activity {
             List<String> results = data.getStringArrayListExtra(
                     RecognizerIntent.EXTRA_RESULTS);
             String spokenText = results.get(0);
-            String[] tokens = spokenText.split(" ");
-            //See if we actually are trying to activate something
-            if (tokens[0].equalsIgnoreCase("Activate")) {
-                if (tokens[1].contains("valve")){
-                    try {
-                        int valve1 = Integer.parseInt(tokens[2]);
-                        // Do something with spokenText
-                        Toast toast = Toast.makeText(this, "Activating valve " + valve1, Toast.LENGTH_LONG);
-                        toast.show();
-                    }catch (NumberFormatException e){
-                        Toast toast = Toast.makeText(this, tokens[2] + " is an invalid valve number", Toast.LENGTH_LONG);
-                        toast.show();
-                    }
-                }
-            }
+            processText(spokenText);
+
 
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    /**
+     * A crappy way to parse our stupid text. When I get around to it I might replace this
+     * with a basic AI. Who knows. Currently it's just a bunch of hardcoded cases.
+     * @param spokenText the input text that was spoken
+     */
+    private void processText(String spokenText){
+        String[] tokens = spokenText.split(" ");
+        int startNum = 0;
+        int endNum = 0;
+        boolean multiple = false;
+        //See if we actually are trying to activate something
+        if (tokens.length > 0) {
+            if (tokens[0].equalsIgnoreCase("Activate")) {
+                //see if we're trying to activate all the valves
+                if (tokens.length > 2) {
+                    if (tokens[1].equalsIgnoreCase("all") && tokens[2].contains("valve")) {
+                        Toast toast = Toast.makeText(this, "Activating all valves", Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+                    //now we must make sure that the second word is valve (no AI remember?)
+                    if (tokens[1].contains("valve")) {
+                        try {
+                            startNum = Integer.parseInt(tokens[2]);
+                            if (tokens.length > 4) {
+                                if (tokens[3].equalsIgnoreCase("through") || tokens[3].equalsIgnoreCase("thru") && tokens.length > 4) {
+                                    multiple = true;
+                                    endNum = Integer.parseInt(tokens[4]);
+                                }
+                            }
+                            if (!multiple) {
+                                // Do something with spokenText
+                                Toast toast = Toast.makeText(this, "Activating valve " + startNum, Toast.LENGTH_LONG);
+                                toast.show();
+                            } else {
+                                Toast toast = Toast.makeText(this, "Activating valves " + startNum + " through " + endNum, Toast.LENGTH_LONG);
+                                toast.show();
+                            }
+                        } catch (NumberFormatException e) {
+                            Toast toast = Toast.makeText(this, "Invalid command format.", Toast.LENGTH_LONG);
+                            toast.show();
+                        }
+                    }
+                }
+            }
+            //we might be trying to deactivate something
+            else if (tokens[0].equalsIgnoreCase("Deactivate")) {
+                if (tokens.length > 2) {
+                    if (tokens[1].equalsIgnoreCase("all") && tokens[2].contains("valve")) {
+                        Toast toast = Toast.makeText(this, "Deactivating all valves", Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+                    if (tokens[1].contains("valve")) {
+                        try {
+                            startNum = Integer.parseInt(tokens[2]);
+                            if (tokens.length > 4) {
+                                if (tokens[3].equalsIgnoreCase("through") || tokens[3].equalsIgnoreCase("thru") && tokens.length > 4) {
+                                    multiple = true;
+                                    endNum = Integer.parseInt(tokens[4]);
+                                }
+                            }
+                            if (!multiple) {
+                                // Do something with spokenText
+                                Toast toast = Toast.makeText(this, "Deactivating valve " + startNum, Toast.LENGTH_LONG);
+                                toast.show();
+                            } else {
+                                Toast toast = Toast.makeText(this, "Deactivating valves " + startNum + " through " + endNum, Toast.LENGTH_LONG);
+                                toast.show();
+                            }
+                        } catch (NumberFormatException e) {
+                            Toast toast = Toast.makeText(this, "Invalid command format.", Toast.LENGTH_LONG);
+                            toast.show();
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }
