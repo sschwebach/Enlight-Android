@@ -133,6 +133,7 @@ public class Fountain {
                 case StateController.IN_QUEUE:
                     ignoreRequests = 2;
                     mActivity.onQueueEntered();
+                    mActivity.onLoadStarted(true);
                     break;
                 case StateController.HAS_CONTROL:
                     mActivity.onControlGained();
@@ -140,6 +141,13 @@ public class Fountain {
                 default:
                     mActivity.onError();
                     break;
+            }
+        }else{
+            // Control hasn't changed, but we're making the UI visible for those waiting in queue
+            if (mState.getState() == StateController.IN_QUEUE){
+                if (ignoreRequests == 0) {
+                    mActivity.onQueueEntered();
+                }
             }
         }
     }
@@ -175,7 +183,9 @@ public class Fountain {
      * Callback from the fountain handler when it has finished all operations in a series
      */
     public void lastOpFinished() {
-        mActivity.onLastLoad();
+        if (ignoreRequests == 0) {
+            mActivity.onLastLoad();
+        }
     }
 
     /**

@@ -112,7 +112,7 @@ public class ControllerActivity extends FountainActivity {
         patternSpinner.setVisibility(View.GONE);
         mView.lock();
         statusText.setText("Waiting for Control");
-        refreshTime.setText("Another user has control. Please wait.");
+        refreshTime.setText("Another user may have control. Please wait.");
         sendButton.setText("Leave Queue");
     }
 
@@ -183,6 +183,7 @@ public class ControllerActivity extends FountainActivity {
      */
     @Override
     public void onLastLoad() {
+        Log.e("LOAD", "Last load");
         sendButton.setVisibility(View.VISIBLE);
         reloadProgress.setVisibility(View.GONE);
     }
