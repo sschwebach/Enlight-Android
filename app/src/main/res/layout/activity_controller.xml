@@ -134,6 +134,14 @@
             android:text="Request Control"
             android:textColor="@color/textcolorgold"
             android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/text_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="false"
+            android:layout_alignParentLeft="true"
+            android:text="@string/enlight_version"/>
     </RelativeLayout>
 
 </RelativeLayout>

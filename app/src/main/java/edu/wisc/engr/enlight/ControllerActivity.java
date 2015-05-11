@@ -57,7 +57,7 @@ public class ControllerActivity extends FountainActivity {
     }
 
     public void setValve(int id, boolean pressed) {
-        super.mFountain.setSingleValve(id, pressed);
+        super.mFountain.setValveStates(id, pressed);
     }
 
     /**
@@ -75,17 +75,17 @@ public class ControllerActivity extends FountainActivity {
         sendButton = (Button) findViewById(R.id.button_send);
         patternSpinner = (Spinner) findViewById(R.id.spinner_pattern);
         reloadProgress = (ProgressBar) findViewById(R.id.progress_reload);
-        timerView = new CircularTimer(this);
+        //timerView = new CircularTimer(this);
 
         // Fake empty container layout
         RelativeLayout lContainerLayout = (RelativeLayout) findViewById(R.id.layout_timerWrap);
         RelativeLayout.LayoutParams timerParams = new RelativeLayout.LayoutParams(500, 500);
         timerParams.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
         timerParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
-        lContainerLayout.addView(timerView, timerParams);
-        timerView.setTimeS(5);
-        timerView.setRadius(200);
-        timerView.start();
+        //lContainerLayout.addView(timerView, timerParams);
+        //timerView.setTimeS(5);
+        //timerView.setRadius(200);
+        //timerView.start();
         //mView.unlock();
 
 

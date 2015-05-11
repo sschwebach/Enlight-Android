@@ -39,7 +39,7 @@ public class FountainView{
      */
     public void onValvePressed(int valve, boolean pressed){
         states[valve - 1] = pressed;
-        mActivity.setValve(valve - 1, pressed);
+        mActivity.setValve(valve, pressed);
     }
 
     /**

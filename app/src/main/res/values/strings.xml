@@ -6,6 +6,7 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="enlight_welcome">Enlight! Yay!</string>
+    <string name="enlight_version">1.2</string>
 
     <string-array name="preset_array">
         <item>Off</item>

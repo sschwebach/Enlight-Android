@@ -71,6 +71,8 @@ public class FountainControlHandler {
 	}
     public FountainControlHandler(Fountain f){
         this.mFountain = f;
+		userIDs = new ArrayList<Integer>();
+		queue = new ArrayList<UserEntry>();
     }
 
 	//TODO
@@ -381,6 +383,7 @@ public class FountainControlHandler {
 						changeControl(true, true);
 						//control is acquired
 					}
+                    Log.e("Queue position", "In position " + bestPosition + " in queue");
 					//reassign the list with old id's removed
 					userIDs = newList;
 

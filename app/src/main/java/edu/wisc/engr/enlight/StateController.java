@@ -51,7 +51,7 @@ public class StateController {
      * Checks if the state should be changed.
      * @return Returns the new state of the program.
      */
-    public boolean tick(boolean reqControl, boolean hasControl){
+    public boolean tick(boolean hasControl, boolean reqControl){
         int oldState = state;
         // If we need to pause the state controller for some reason
         if (!wait) {

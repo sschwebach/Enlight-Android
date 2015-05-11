@@ -113,9 +113,9 @@ public class Fountain {
      * @param reqControl
      * @param hasControl
      */
-    public void controlChanged(boolean reqControl, boolean hasControl) {
+    public void controlChanged(boolean hasControl, boolean reqControl) {
         // See if the state has actually changed
-        if (mState.tick(reqControl, hasControl)) {
+        if (mState.tick(hasControl, reqControl)) {
             // See what state we just entered
             switch (mState.getState()) {
                 case StateController.NO_STATE:

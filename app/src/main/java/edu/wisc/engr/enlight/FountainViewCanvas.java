@@ -248,10 +248,12 @@ public class FountainViewCanvas extends View{
 					Log.e("BUTTON", "" + buttonNum);
 					this.invalidate();
 					//send the server request
-					if (left){
-                        fView.onValvePressed(13 - buttonNum, buttonPressed[buttonNum - 1]);
-					}else{
-                        fView.onValvePressed(25 - buttonNum, buttonPressed[buttonNum - 1]);
+					if (fView != null) {
+						if (left) {
+							fView.onValvePressed(13 - buttonNum, buttonPressed[buttonNum - 1]);
+						} else {
+							fView.onValvePressed(25 - buttonNum, buttonPressed[buttonNum - 1]);
+						}
 					}
 				}
 			}
