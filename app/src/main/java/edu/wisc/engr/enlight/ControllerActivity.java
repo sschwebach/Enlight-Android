@@ -183,7 +183,6 @@ public class ControllerActivity extends FountainActivity {
      */
     @Override
     public void onLastLoad() {
-        Log.e("LOAD", "Last load");
         sendButton.setVisibility(View.VISIBLE);
         reloadProgress.setVisibility(View.GONE);
     }

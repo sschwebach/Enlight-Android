@@ -124,6 +124,7 @@ public class Fountain {
                     break;
                 case StateController.NO_REQUESTS:
                     mHandler.currID = 0;
+                    ignoreRequests = 2;
                     mActivity.onNoRequest();
                     if (repeat) {
                         mHandler.requestControl();
@@ -144,10 +145,26 @@ public class Fountain {
             }
         }else{
             // Control hasn't changed, but we're making the UI visible for those waiting in queue
-            if (mState.getState() == StateController.IN_QUEUE){
-                if (ignoreRequests == 0) {
-                    mActivity.onQueueEntered();
-                }
+            switch (mState.getState()) {
+                case StateController.NO_STATE:
+                    mActivity.onError();
+                    break;
+                case StateController.NO_REQUESTS:
+                    if (ignoreRequests == 0) {
+                        mActivity.onNoRequest();
+                    }
+                    break;
+                case StateController.IN_QUEUE:
+                    if (ignoreRequests == 0) {
+                        mActivity.onQueueEntered();
+                    }
+                    break;
+                case StateController.HAS_CONTROL:
+                    mActivity.onControlGained();
+                    break;
+                default:
+                    mActivity.onError();
+                    break;
             }
         }
     }
