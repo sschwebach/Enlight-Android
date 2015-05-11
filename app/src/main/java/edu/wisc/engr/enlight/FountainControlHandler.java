@@ -97,7 +97,7 @@ public class FountainControlHandler {
 	public void requestControl(){
 		FountainControlTask requestControlTask = new FountainControlTask();
 		requestControlTask.addNVP(new BasicNameValuePair("apikey", "" + apiKey));
-		requestControlTask.addNVP(new BasicNameValuePair("requestedLength", "30"));
+		requestControlTask.addNVP(new BasicNameValuePair("requestedLength", "32"));
 		requestControlTask.requestControl = REQUESTCONTROL;
 		requestControlTask.isPost = true;
 		requestControlTask.execute(Utilities.requestControlURL);
@@ -120,6 +120,7 @@ public class FountainControlHandler {
         requestPositionTask.isPost = true;
         requestPositionTask.addNVP(new BasicNameValuePair("apikey", "" + apiKey));
         requestPositionTask.addNVP(new BasicNameValuePair("controllerID", "" + currID));
+        Log.e("ID Sent", "Sent id " + currID);
         requestPositionTask.execute(Utilities.queryURL);
     }
 
@@ -363,8 +364,9 @@ public class FountainControlHandler {
                             if (aQueue.id == userIDs.get(i)) {
                                 //we found a user
                                 found = true;
-                                //see if this is the best position found
-                                if (aQueue.position < bestPosition) {
+                                Log.e("User Found", "User is id " + aQueue.id);
+                                //see if this is the best position found (not counting negative ones)
+                                if (aQueue.position < bestPosition && aQueue.position >= 0) {
                                     bestPosition = aQueue.position;
                                 }
                             }
@@ -393,7 +395,7 @@ public class FountainControlHandler {
                     success = currJSON.getBoolean("success");
                     int trueQueuePos = currJSON.getInt("trueQueuePosition");
                     int eta = currJSON.getInt("eta");
-                    Log.e("Position", "In position " + trueQueuePos + ". ETA: " + eta);
+                    Log.e("Position", "In position " + trueQueuePos + ". ETA: " + eta + " for userID " + currID);
                     if (success && trueQueuePos == 0){
                         //got control
                         changeControl(true, true);

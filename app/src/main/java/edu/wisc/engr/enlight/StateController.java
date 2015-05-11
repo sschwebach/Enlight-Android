@@ -1,6 +1,7 @@
 package edu.wisc.engr.enlight;
 
 import android.app.Activity;
+import android.util.Log;
 
 /**
  * Created by SAM-DESK on 1/24/2015.
@@ -96,6 +97,7 @@ public class StateController {
             //first see if the state even changes
             if (state != oldState){
                 //if the state has changed, actually do something
+                Log.e("State", "State changed!");
                 return true;
             }
             //even if the state hasn't changed, we want to put the button back I suppose

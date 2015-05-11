@@ -18,6 +18,7 @@ public class Fountain {
     private final int REFRESHTIME = 1000;
     private Timer refreshTimer;
     private boolean isRunning = false;
+    private int ignoreRequests = 0; // If we want to skip checking for a few cycles
 
     /**
      * Constructor for our Fountain object
@@ -130,6 +131,7 @@ public class Fountain {
                     }
                     break;
                 case StateController.IN_QUEUE:
+                    ignoreRequests = 2;
                     mActivity.onQueueEntered();
                     break;
                 case StateController.HAS_CONTROL:
@@ -195,14 +197,19 @@ public class Fountain {
                 int currState = mState.getState();
                 if (pm.isScreenOn() && isRunning) {
                     //TODO is this statement correct???
-                    if (currState == StateController.IN_QUEUE || currState == StateController.HAS_CONTROL || mHandler.currID != 0) {
-                        mHandler.queryPosition();
-                        mActivity.onLoadStarted(false);
-                    }
+                    if (ignoreRequests <= 0) {
+                        ignoreRequests = 0;
+                        if (currState == StateController.IN_QUEUE || currState == StateController.HAS_CONTROL || mHandler.currID != 0) {
+                            mHandler.queryPosition();
+                            mActivity.onLoadStarted(false);
+                        }
 
-                    if (currState != StateController.HAS_CONTROL) {
-                        mActivity.onLoadStarted(false);
-                        mHandler.queryAllValves();
+                        if (currState != StateController.HAS_CONTROL) {
+                            mActivity.onLoadStarted(false);
+                            mHandler.queryAllValves();
+                        }
+                    }else{
+                        ignoreRequests--;
                     }
                 }
             }
