@@ -2,7 +2,10 @@ package edu.wisc.engr.enlight;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Layout;
 import android.util.Log;
@@ -31,6 +34,7 @@ public class ControllerActivity extends FountainActivity {
     FountainView mView;
     FountainViewCanvas leftView;
     FountainViewCanvas rightView;
+    boolean dialogShowing = false;
     CircularTimer timerView;
 
 
@@ -109,11 +113,16 @@ public class ControllerActivity extends FountainActivity {
      */
     @Override
     public void onQueueEntered() {
-        patternSpinner.setVisibility(View.GONE);
-        mView.lock();
-        statusText.setText("Waiting for Control");
-        refreshTime.setText("Another user may have control. Please wait.");
-        sendButton.setText("Leave Queue");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                patternSpinner.setVisibility(View.GONE);
+                mView.lock();
+                statusText.setText("Waiting for Control");
+                refreshTime.setText("Another user may have control. Please wait.");
+                sendButton.setText("Leave Queue");
+            }
+        });
     }
 
     /**
@@ -121,11 +130,17 @@ public class ControllerActivity extends FountainActivity {
      */
     @Override
     public void onControlGained() {
-        patternSpinner.setVisibility(View.VISIBLE);
-        mView.unlock();
-        statusText.setText("You Have Control");
-        refreshTime.setText("Tap a valve to activate it.");
-        sendButton.setText("Release Control");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                patternSpinner.setVisibility(View.VISIBLE);
+                mView.unlock();
+                statusText.setText("You Have Control");
+                refreshTime.setText("Tap a valve to activate it.");
+                sendButton.setText("Release Control");
+            }
+        });
+
     }
 
     /**
@@ -133,20 +148,32 @@ public class ControllerActivity extends FountainActivity {
      */
     @Override
     public void onNoRequest() {
-        patternSpinner.setVisibility(View.GONE);
-        mView.lock();
-        statusText.setText("Fountain Status");
-        refreshTime.setText("Request control to gain access.");
-        sendButton.setText("Request Control");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                patternSpinner.setVisibility(View.GONE);
+                mView.lock();
+                statusText.setText("Fountain Status");
+                refreshTime.setText("Request control to gain access.");
+                sendButton.setText("Request Control");
+            }
+        });
+
     }
 
     /**
      * Callback for when the valve states of the fountain changed.
      */
     @Override
-    public void onValvesChanged(boolean[] states) {
-        //we want to update our fountain view
-        mView.setValves(states);
+    public void onValvesChanged(final boolean[] states) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //we want to update our fountain view
+                mView.setValves(states);
+            }
+        });
+
     }
 
     /**
@@ -155,11 +182,17 @@ public class ControllerActivity extends FountainActivity {
      * @param hide If true, the webcall isn't being made from the timer method (might want to hide UI aspects)
      */
     @Override
-    public void onLoadStarted(boolean hide) {
-        if (hide) {
-            sendButton.setVisibility(View.GONE);
-            reloadProgress.setVisibility(View.VISIBLE);
-        }
+    public void onLoadStarted(final boolean hide) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (hide) {
+                    sendButton.setVisibility(View.GONE);
+                    reloadProgress.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
     }
 
     /**
@@ -174,7 +207,32 @@ public class ControllerActivity extends FountainActivity {
      * Callback for when the fountain class encounters an error
      */
     @Override
-    public void onError() {
+    public void onError(final Utilities.ERROR_STATE error) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                switch (error) {
+                    case INTERNET:
+                        // An internet connection error has occured, alert the user with a dialog
+                        if (!dialogShowing) {
+                            new AlertDialog.Builder(ControllerActivity.this)
+                                    .setTitle("Connection error")
+                                    .setMessage("Error connecting to server. Are you connected to the internet?")
+                                    .setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            // delete or something?
+                                            dialogShowing = false;
+                                        }
+                                    })
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    .show();
+                            dialogShowing = true;
+                            break;
+                        }
+                }
+            }
+        });
 
     }
 
@@ -183,8 +241,14 @@ public class ControllerActivity extends FountainActivity {
      */
     @Override
     public void onLastLoad() {
-        sendButton.setVisibility(View.VISIBLE);
-        reloadProgress.setVisibility(View.GONE);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                sendButton.setVisibility(View.VISIBLE);
+                reloadProgress.setVisibility(View.GONE);
+            }
+        });
+
     }
 
     /**
@@ -200,4 +264,6 @@ public class ControllerActivity extends FountainActivity {
         fountainCanvasLeft.addView(leftView);
         fountainCanvasRight.addView(rightView);
     }
+
+
 }

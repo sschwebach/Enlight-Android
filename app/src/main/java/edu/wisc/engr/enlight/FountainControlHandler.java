@@ -15,6 +15,9 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,6 +59,7 @@ public class FountainControlHandler {
 	public static final int GETPATTERN = 7;
 	public static final int SETPATTERN = 8;
     public static final int QUERYPOSITION = 9;
+    private static final int timeoutConnection = 3000; //timeout in ms
 	FountainViewCanvas leftView;
 	FountainViewCanvas rightView;
 	ArrayList<Integer> userIDs;
@@ -252,7 +256,11 @@ public class FountainControlHandler {
 			if (isPost){
 				//control task
 				try{
-					HttpClient client = new DefaultHttpClient();
+                    // Set timeout parameters in ms
+                    HttpParams httpParams = new BasicHttpParams();
+                    HttpConnectionParams.setConnectionTimeout(httpParams, timeoutConnection);
+                    // create the http client
+                    HttpClient client = new DefaultHttpClient(httpParams);
 					HttpPost post = new HttpPost(arg0[0]);
                     StringEntity se = new StringEntity(json.toString());
                     se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
@@ -269,7 +277,11 @@ public class FountainControlHandler {
 			}else {
 				//query task
 				try {
-					HttpClient client = new DefaultHttpClient();
+                    // Set timeout parameters in ms
+                    HttpParams httpParams = new BasicHttpParams();
+                    HttpConnectionParams.setConnectionTimeout(httpParams, timeoutConnection);
+                    // create the http client
+                    HttpClient client = new DefaultHttpClient(httpParams);
 					HttpGet get = new HttpGet(arg0[0]);
 					HttpResponse response = client.execute(get);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));

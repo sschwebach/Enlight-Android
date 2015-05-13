@@ -52,7 +52,7 @@ public abstract class FountainActivity extends Activity{
     /**
      * Callback for when the fountain class encounters an error
      */
-    public abstract void onError();
+    public abstract void onError(Utilities.ERROR_STATE error);
 
     /**
      * Callback for when the last load is done (might get rid of this for onLoadEnded)

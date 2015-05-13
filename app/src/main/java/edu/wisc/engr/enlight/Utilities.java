@@ -33,5 +33,11 @@ public class Utilities {
         DisplayMetrics metrics = resources.getDisplayMetrics();
         return dp * (metrics.densityDpi / 160f);
     }
-			
+
+    /**
+     * An enum for listing the errors that could happen
+     */
+    public enum ERROR_STATE{
+        INTERNET, DEFAULT;
+    }
 }

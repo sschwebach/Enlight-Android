@@ -16,6 +16,8 @@ public class Fountain {
     boolean[] valveStates = new boolean[24];
     private boolean repeat = false;
     private final int REFRESHTIME = 1000;
+    private int badRequestCount;
+    private final int badRequestThreshold = 20; // for now
     private Timer refreshTimer;
     private boolean isRunning = false;
     private int ignoreRequests = 0; // If we want to skip checking for a few cycles
@@ -28,6 +30,7 @@ public class Fountain {
         this.mActivity = a;
         this.mState = new StateController(this);
         this.mHandler = new FountainControlHandler(this);
+        this.badRequestCount = 0;
         //TODO make the timer and the timer methods
     }
 
@@ -120,7 +123,7 @@ public class Fountain {
             // See what state we just entered
             switch (mState.getState()) {
                 case StateController.NO_STATE:
-                    mActivity.onError();
+                    mActivity.onError(Utilities.ERROR_STATE.DEFAULT);
                     break;
                 case StateController.NO_REQUESTS:
                     mHandler.currID = 0;
@@ -140,14 +143,14 @@ public class Fountain {
                     mActivity.onControlGained();
                     break;
                 default:
-                    mActivity.onError();
+                    mActivity.onError(Utilities.ERROR_STATE.DEFAULT);
                     break;
             }
         }else{
             // Control hasn't changed, but we're making the UI visible for those waiting in queue
             switch (mState.getState()) {
                 case StateController.NO_STATE:
-                    mActivity.onError();
+                    mActivity.onError(Utilities.ERROR_STATE.DEFAULT);
                     break;
                 case StateController.NO_REQUESTS:
                     if (ignoreRequests == 0) {
@@ -163,7 +166,7 @@ public class Fountain {
                     mActivity.onControlGained();
                     break;
                 default:
-                    mActivity.onError();
+                    mActivity.onError(Utilities.ERROR_STATE.DEFAULT);
                     break;
             }
         }
@@ -209,7 +212,16 @@ public class Fountain {
      * Callback from the fountain handler when a request doesn't succeed
      */
     public void badRequest() {
-        mActivity.onError();
+        badRequestCount++;
+        if (badRequestCount >= badRequestThreshold){
+            // Reset the state of the fountain, alert the user of a bad internet connection
+            // For
+            mActivity.onError(Utilities.ERROR_STATE.INTERNET);
+            badRequestCount = 0;
+            mHandler.changeControl(false, false);
+            controlChanged(false, false);
+        }
+
     }
 
     /**
