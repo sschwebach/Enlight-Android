@@ -21,7 +21,6 @@ public class StateController {
     //a boolean to indicate a web call is going on
     public boolean busy = false;
     private Fountain mFountain;
-    //TODO add support for pending requests that couldn't be serviced due to a web call
 
     /*
     The goal of this class is to make an FSM-like design for the different states of the app

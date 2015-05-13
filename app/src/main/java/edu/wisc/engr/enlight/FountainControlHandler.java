@@ -331,10 +331,8 @@ public class FountainControlHandler {
 				int acquired;
 				int expires;
 				int position;
-				//TODO
 				switch (requestControl){
-				case REQUESTCONTROL:	
-					//TODO
+				case REQUESTCONTROL:
 					currJSON = finalObject;
                     //Log.e("CURRJSON", currJSON.toString());
 					success = Boolean.parseBoolean(currJSON.getString("success"));
@@ -364,7 +362,6 @@ public class FountainControlHandler {
 						priority = currJSON.getInt("priority");
 						position = currJSON.getInt("queuePosition");
 						queue.add(new UserEntry(id, acquired, expires, priority, position));
-						//TODO build a queue AND SET THE ACTIVITY'S QUEUE TO THIS
 					}
 					//Now that we have the queue, see if any of our userids are in the queue
 					int bestPosition = Integer.MAX_VALUE;
@@ -427,7 +424,6 @@ public class FountainControlHandler {
 					currJSON = finalObject;
 					success = currJSON.getBoolean("success");
 					if (!success){
-						//TODO some error message
                         if (mFountain != null){
                             mFountain.badRequest();
                         }
@@ -467,7 +463,6 @@ public class FountainControlHandler {
 					currJSON = finalObject;
 					success = currJSON.getBoolean("success");
 					if (!success){
-						//TODO some error message
                         if (mFountain != null){
                             mFountain.badRequest();
                         }
@@ -488,7 +483,6 @@ public class FountainControlHandler {
 					currJSON = finalObject;
 					success = currJSON.getBoolean("success");
 					if (!success){
-						//TODO some error message
                         if (mFountain != null){
                             mFountain.badRequest();
                         }
@@ -519,7 +513,6 @@ public class FountainControlHandler {
 					currJSON = finalObject;
 					success = currJSON.getBoolean("success");
 					if (!success){
-						//TODO some error message
                         if (mFountain != null){
                             mFountain.badRequest();
                         }
