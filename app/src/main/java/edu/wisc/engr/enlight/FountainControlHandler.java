@@ -124,7 +124,7 @@ public class FountainControlHandler {
         requestPositionTask.isPost = true;
         requestPositionTask.addNVP(new BasicNameValuePair("apikey", "" + apiKey));
         requestPositionTask.addNVP(new BasicNameValuePair("controllerID", "" + currID));
-        Log.e("ID Sent", "Sent id " + currID);
+        //Log.e("ID Sent", "Sent id " + currID);
         requestPositionTask.execute(Utilities.queryURL);
     }
 
@@ -238,7 +238,7 @@ public class FountainControlHandler {
             try{
                 json.put(toAdd.getName(), toAdd.getValue());
             }catch (Exception e){
-                Log.e("JSON Exception", e.toString());
+                //Log.e("JSON Exception", e.toString());
             }
 		}
 		@Override
@@ -269,7 +269,7 @@ public class FountainControlHandler {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
                     return reader.readLine();
 				}catch (Exception e){
-					Log.e("Exception", e.toString());
+					//Log.e("Exception", e.toString());
                     if (mFountain != null){
                         mFountain.badRequest();
                     }
@@ -287,7 +287,7 @@ public class FountainControlHandler {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
                     return reader.readLine();
 				} catch (Exception e) {
-					Log.e("BackgroundTaskException", e.toString());
+					//Log.e("BackgroundTaskException", e.toString());
                     if (mFountain != null){
                         mFountain.badRequest();
                     }
@@ -300,7 +300,7 @@ public class FountainControlHandler {
 		protected void onPostExecute(String response){
 			pairs.clear();
             if (response != null){
-                Log.e("RESPONSE", requestControl + response);
+                //Log.e("RESPONSE", requestControl + response);
             }
 
 
@@ -336,7 +336,7 @@ public class FountainControlHandler {
 				case REQUESTCONTROL:	
 					//TODO
 					currJSON = finalObject;
-                    Log.e("CURRJSON", currJSON.toString());
+                    //Log.e("CURRJSON", currJSON.toString());
 					success = Boolean.parseBoolean(currJSON.getString("success"));
 					expires = currJSON.getInt("ttl");
 					id = currJSON.getInt("controllerID");
@@ -344,7 +344,7 @@ public class FountainControlHandler {
 					if (success){
                         //Toast toast = Toast.makeText(mContext, "Successfully Requested Control", Toast.LENGTH_SHORT);
                         //toast.show();
-                        Log.e("REQUEST", "" + id);
+                        //Log.e("REQUEST", "" + id);
                         currID = id;
 						userIDs.add(id);
                         changeControl(false, true);
@@ -376,7 +376,7 @@ public class FountainControlHandler {
                             if (aQueue.id == userIDs.get(i)) {
                                 //we found a user
                                 found = true;
-                                Log.e("User Found", "User is id " + aQueue.id);
+                                //Log.e("User Found", "User is id " + aQueue.id);
                                 //see if this is the best position found (not counting negative ones)
                                 if (aQueue.position < bestPosition && aQueue.position >= 0) {
                                     bestPosition = aQueue.position;
@@ -397,7 +397,7 @@ public class FountainControlHandler {
 						changeControl(true, true);
 						//control is acquired
 					}
-                    Log.e("Queue position", "In position " + bestPosition + " in queue");
+                    //Log.e("Queue position", "In position " + bestPosition + " in queue");
 					//reassign the list with old id's removed
 					userIDs = newList;
 
@@ -407,7 +407,7 @@ public class FountainControlHandler {
                     success = currJSON.getBoolean("success");
                     int trueQueuePos = currJSON.getInt("trueQueuePosition");
                     int eta = currJSON.getInt("eta");
-                    Log.e("Position", "In position " + trueQueuePos + ". ETA: " + eta + " for userID " + currID);
+                    //Log.e("Position", "In position " + trueQueuePos + ". ETA: " + eta + " for userID " + currID);
                     if (success && trueQueuePos == 0){
                         //got control
                         changeControl(true, true);
@@ -530,8 +530,8 @@ public class FountainControlHandler {
 				}
 				//do something with this result
 			}catch (Exception e){
-                Log.e("Result Exception", "", e);
-				Log.e("JSON", finalObject.toString());
+                //Log.e("Result Exception", "", e);
+				//Log.e("JSON", finalObject.toString());
                 if (mFountain != null){
                     mFountain.badRequest();
                 }

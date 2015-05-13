@@ -245,7 +245,7 @@ public class FountainViewCanvas extends View{
 				float yLoc = e.getY();
 				int buttonNum = detectButton(xLoc, yLoc);
 				if (buttonNum > 0){
-					Log.e("BUTTON", "" + buttonNum);
+					//Log.e("BUTTON", "" + buttonNum);
 					this.invalidate();
 					//send the server request
 					if (fView != null) {

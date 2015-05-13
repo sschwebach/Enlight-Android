@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "edu.wisc.engr.enlight"
-        minSdkVersion 16
+        minSdkVersion 8
         targetSdkVersion 19
     }
 

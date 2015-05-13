@@ -41,7 +41,7 @@ public class ControllerActivity extends FountainActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_controller, menu);
+        //getMenuInflater().inflate(R.menu.menu_controller, menu);
         return true;
     }
 
@@ -70,7 +70,7 @@ public class ControllerActivity extends FountainActivity {
      */
     @Override
     public void doSetup() {
-        Log.e("Setup", "Setup");
+        //Log.e("Setup", "Setup");
         setContentView(R.layout.activity_controller);
         // Instantiate our fountain view
         addCanvas();

@@ -67,6 +67,7 @@ public abstract class FountainActivity extends Activity{
         mFountain.start(false);
     }
 
+
     @Override
     protected void onPause(){
         super.onPause();
