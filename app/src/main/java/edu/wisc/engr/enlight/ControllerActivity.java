@@ -99,7 +99,7 @@ public class ControllerActivity extends FountainActivity {
                 if (mFountain.getState() == Utilities.HAS_CONTROL) {
                     mFountain.releaseControl();
                 } else if (mFountain.getState() == Utilities.IN_QUEUE) {
-                    mFountain.releaseControl();
+                    mFountain.leaveQueue();
                 } else if (mFountain.getState() == Utilities.NO_REQUESTS) {
                     mFountain.requestControl();
                 }
